@@ -91,6 +91,7 @@ body {
 /* Main View */
 #main-view {
   flex: 1;
+  min-height: 0;
   position: relative;
   overflow: hidden;
 }
@@ -348,6 +349,8 @@ body {
 /* Bottom Nav */
 #bottom-nav {
   height: var(--bottom-nav-height);
+  flex-shrink: 0;
+  padding-bottom: env(safe-area-inset-bottom);
   background-color: #1e2124;
   display: flex;
   justify-content: space-around;

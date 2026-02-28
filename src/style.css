@@ -370,6 +370,7 @@ body {
   gap: 2px;
   cursor: pointer;
   transition: all 0.2s;
+  pointer-events: auto;
 }
 
 .nav-button.active {

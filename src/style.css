@@ -75,6 +75,7 @@ body {
   flex-direction: column;
   align-items: flex-end;
   font-size: 0.9rem;
+  margin-right: 40px;
 }
 
 #ui-equipped-axe {

@@ -62,7 +62,10 @@ export class UIManager {
         };
 
         const endChop = (e: Event) => {
-            e.preventDefault();
+            const target = e.target as Node;
+            if (target && treeContainer.contains(target)) {
+                e.preventDefault();
+            }
             chopSystem.handleInput(false);
         };
 

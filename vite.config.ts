@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-const base = (globalThis as unknown as { process?: { env?: { BASE_PATH?: string } } }).process?.env?.BASE_PATH ?? '/';
+const base = process.env.BASE_PATH ?? '/chop-it-like-its-hawt/';
 
 export default defineConfig({
   base,

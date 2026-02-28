@@ -1,0 +1,20 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node"
+    }
+  },
+  "default-branch": "main",
+  "changelog-sections": [
+    "features",
+    "fix",
+    "perf",
+    "refactor",
+    "style",
+    "docs",
+    "test",
+    "chore"
+  ],
+  "include-v-in-tag": true,
+  "commitize": true
+}

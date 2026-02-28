@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chop it like it's HAWT</title>
+  <link rel="icon"
+    href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🪓</text></svg>' />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div id="game-container">
+    <!-- Top Bar -->
+    <header id="top-bar">
+      <div class="currency-container">
+        <div class="wood-currency" id="ui-total-wood">
+          <span class="wood-icon">🪵</span>
+          <span class="wood-amount">0</span>
+        </div>
+        <!-- Rare woods can be appended here dynamically -->
+      </div>
+      <div class="axe-stats">
+        <span id="ui-equipped-axe">Rusty Axe</span>
+        <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-view">
+
+      <!-- Chop Screen (Default) -->
+      <section id="screen-chop" class="screen active">
+        <div id="tree-area">
+          <div id="tree-container">
+            <div id="hp-bar-container">
+              <div id="hp-bar-fill"></div>
+            </div>
+            <div id="tree-sprite" class="tree-sprite">🌲</div>
+            <div id="damage-numbers-layer"></div>
+          </div>
+        </div>
+        <div class="tap-hint">Tap to Chop!</div>
+      </section>
+
+      <!-- Upgrades Screen -->
+      <section id="screen-upgrades" class="screen hidden">
+        <h2>Upgrades</h2>
+        <div id="upgrades-list" class="scrollable-list">
+          <!-- Dynamic upgrade buttons go here -->
+        </div>
+      </section>
+
+      <!-- Axes Screen -->
+      <section id="screen-axes" class="screen hidden">
+        <h2>Axes</h2>
+        <div id="axes-list" class="scrollable-list">
+          <!-- Dynamic axe items go here -->
+        </div>
+      </section>
+
+      <!-- Forest Screen -->
+      <section id="screen-forest" class="screen hidden">
+        <h2>Forest</h2>
+        <div id="forest-content">
+          <p>Your idle workers are chopping...</p>
+          <div class="idle-stats" id="ui-idle-rate">0 🪵 / sec</div>
+          <div class="forest-upgrades">
+            <!-- Forest specific upgrades could go here -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav">
+      <button class="nav-button active" data-target="screen-chop">🪓<br>Chop</button>
+      <button class="nav-button" data-target="screen-upgrades">💪<br>Upgrades</button>
+      <button class="nav-button" data-target="screen-axes">🗡️<br>Axes</button>
+      <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
+    </nav>
+
+    <!-- Full Screen Overlays -->
+    <div id="settings-overlay" class="overlay hidden">
+      <div class="modal">
+        <h2>Settings</h2>
+        <button id="btn-toggle-sfx">Sound: ON</button>
+        <button id="btn-toggle-haptics">Haptics: ON</button>
+        <button id="btn-about">About</button>
+        <button id="btn-hard-reset" class="danger">Hard Reset</button>
+        <button id="btn-close-settings">Close</button>
+      </div>
+    </div>
+    <div id="about-overlay" class="overlay hidden">
+      <div class="modal">
+        <h2>About</h2>
+        <p>Chop it like it's HAWT</p>
+        <p>Version: <span id="game-version">1.0.0</span></p>
+        <button id="btn-close-about">Close</button>
+      </div>
+    </div>
+    <button id="btn-settings-open">⚙️</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

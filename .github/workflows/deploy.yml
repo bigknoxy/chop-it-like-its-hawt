@@ -31,7 +31,12 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: BASE_PATH='/chop-it-like-its-hawt/' npm run build
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            BASE_PATH='/' npm run build
+          else
+            BASE_PATH='/dev/' npm run build
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

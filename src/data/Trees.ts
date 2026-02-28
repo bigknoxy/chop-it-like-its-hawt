@@ -38,6 +38,44 @@ export const TREES: Record<string, TreeDefinition> = {
         spawnWeight: 3,
         specialMechanic: 'chest',
         emoji: '✨'
+    },
+    // ---- Haunted Weald Trees ----
+    tree_spooky: {
+        id: 'tree_spooky',
+        name: 'Weeping Willow',
+        maxHP: 5000,
+        baseWoodYield: 100,
+        woodTypeId: 'spooky_wood',
+        spawnWeight: 50,
+        emoji: '🥀'
+    },
+    tree_cursed_ash: {
+        id: 'tree_cursed_ash',
+        name: 'Cursed Ash',
+        maxHP: 20000,
+        baseWoodYield: 250,
+        woodTypeId: 'spooky_wood',
+        spawnWeight: 20,
+        emoji: '🌪️'
+    },
+    // ---- Frozen Tundra Trees ----
+    tree_glacier_pine: {
+        id: 'tree_glacier_pine',
+        name: 'Glacier Pine',
+        maxHP: 80000,
+        baseWoodYield: 500,
+        woodTypeId: 'glacier_sap',
+        spawnWeight: 40,
+        emoji: '🧊'
+    },
+    tree_crystal_birch: {
+        id: 'tree_crystal_birch',
+        name: 'Crystal Birch',
+        maxHP: 250000,
+        baseWoodYield: 1500,
+        woodTypeId: 'glacier_sap',
+        spawnWeight: 15,
+        emoji: '💎'
     }
 };
 

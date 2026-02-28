@@ -7,6 +7,31 @@ export interface WoodType {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
 
+export type BiomeId = 'home_forest' | 'frozen_tundra' | 'haunted_weald' | 'crystal_caverns' | string;
+
+export interface BiomeDefinition {
+  id: BiomeId;
+  name: string;
+  description: string;
+  emoji: string;
+  unlockCost: { woodTypeId: WoodTypeId; amount: number }[];
+  // Which trees can spawn in this biome
+  spawnableTrees: string[]; // tree IDs
+}
+
+export type CompanionId = 'beaver_bob' | 'woodpecker_willy' | 'bear_barry' | string;
+
+export interface CompanionDefinition {
+  id: CompanionId;
+  name: string;
+  description: string;
+  emoji: string;
+  unlockCost: { woodTypeId: WoodTypeId; amount: number }[];
+  baseDps: number;
+  maxLevel: number;
+  levelCostMultiplier: number; // How much wood the next level costs
+}
+
 export interface TreeDefinition {
   id: string;
   name: string;
@@ -69,5 +94,12 @@ export interface PlayerState {
   ownedAxes: string[];
   equippedAxeId: string;
   forest: ForestState;
+
+  // V2 Additions
+  activeBiomeId: BiomeId;
+  unlockedBiomes: BiomeId[];
+  equippedCompanionId: string | null;
+  companions: Record<string, number>; // companionId -> level (0 means unlocked, undefined means locked)
+
   lastSaveTimestamp: number;
 }

@@ -3,6 +3,8 @@ import { TREES } from '../data/Trees';
 import { AXES } from '../data/Axes';
 import { UPGRADES } from '../data/Upgrades';
 import { WOODS } from '../data/Woods';
+import { biomeSystem } from './BiomeSystem';
+import { companionSystem } from './CompanionSystem';
 
 // Events to notify UI
 export const ChopEvents = {
@@ -61,8 +63,15 @@ export class ChopSystem {
     public update(dt: number) {
         // Handle Auto-Chop
         const autoChopLvl = state.upgrades['upg_autochop'] || 0;
+        let autoDps = 0;
         if (autoChopLvl > 0) {
-            const autoDps = autoChopLvl * UPGRADES.upg_autochop.effectPerLevel;
+            autoDps += autoChopLvl * UPGRADES.upg_autochop.effectPerLevel;
+        }
+
+        // Handle Companion Auto Chop
+        autoDps += companionSystem.getActiveDPS();
+
+        if (autoDps > 0) {
             this.applyDamage(autoDps * dt, false);
         }
 
@@ -107,43 +116,19 @@ export class ChopSystem {
         // Wood value multiplier (handled at currency addition, or pre-calculated)
         // Actually PRD says woodGain = baseWoodYield * (1+bonus) * valueMultiplier.
         // valueMultiplier makes the amount bigger? Oh, "wood types act as currencies". The resource count goes up physically by the multiplier or it goes to `woodByType` container.
-        // Let's just grant a quantity of that specific wood type. The valueMultiplier is typically for selling, but let's add raw amount.
-        woodGain = Math.ceil(woodGain);
+        // Add wood
+        const baseWood = def.baseWoodYield;
+        const totalYield = Math.ceil(baseWood * WOODS[def.woodTypeId].valueMultiplier);
+        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + totalYield;
+        state.totalWood += totalYield;
 
-        // Add to state
-        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
-
-        // Also increase total wood generically based on value multiplier?
-        const woodDef = WOODS[def.woodTypeId];
-        const totalAdded = woodGain * woodDef.valueMultiplier;
-        state.totalWood += totalAdded;
-
-        ChopEvents.onTreeFall(woodGain, def.woodTypeId);
+        ChopEvents.onTreeFall(totalYield, def.woodTypeId);
         ChopEvents.onWoodUpdate();
 
-        // Spawn next tree
-        setTimeout(() => this.spawnNextTree(), 500); // Wait for fall animation
-    }
 
-    private spawnNextTree() {
-        // Weighted random selection
-        const totalWeight = Object.values(TREES).reduce((sum, def) => sum + def.spawnWeight, 0);
-        let rand = Math.random() * totalWeight;
-
-        let selectedId = 'tree_basic';
-        for (const tree of Object.values(TREES)) {
-            if (rand < tree.spawnWeight) {
-                selectedId = tree.id;
-                break;
-            }
-            rand -= tree.spawnWeight;
-        }
-
-        setCurrentTree({
-            defId: selectedId,
-            currentHP: TREES[selectedId].maxHP,
-            isActive: true,
-        });
+        // Spawn a new tree from the active biome's pool
+        currentTree.isActive = false;
+        biomeSystem.spawnTreeForBiome(state.activeBiomeId);
     }
 }
 

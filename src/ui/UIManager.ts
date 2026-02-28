@@ -8,6 +8,10 @@ import { upgradeSystem, UpgradeEvents } from '../systems/UpgradeSystem';
 import { axeSystem, AxeEvents } from '../systems/AxeSystem';
 import { forestSystem, ForestEvents } from '../systems/ForestSystem';
 import { saveSystem, SaveEvents } from '../systems/SaveSystem';
+import { biomeSystem, BiomeEvents } from '../systems/BiomeSystem';
+import { BIOMES } from '../data/Biomes';
+import { companionSystem, CompanionEvents } from '../systems/CompanionSystem';
+import { COMPANIONS } from '../data/Pets';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -117,6 +121,30 @@ export class UIManager {
             this.updateHUD();
         };
 
+        BiomeEvents.onBiomeUnlocked = () => {
+            this.renderMap();
+        };
+
+        BiomeEvents.onBiomeChanged = () => {
+            this.renderMap();
+            this.renderTree(); // The tree immediately changes to the new biome's tree
+        };
+
+        CompanionEvents.onCompanionUnlocked = () => {
+            this.renderPets();
+            this.updateHUD();
+        };
+
+        CompanionEvents.onCompanionLeveledUp = () => {
+            this.renderPets();
+            this.updateHUD();
+        };
+
+        CompanionEvents.onCompanionEquipped = () => {
+            this.renderPets();
+            this.updateHUD();
+        };
+
         // Settings
         document.getElementById('btn-settings-open')!.addEventListener('click', () => {
             document.getElementById('settings-overlay')!.classList.remove('hidden');
@@ -171,6 +199,8 @@ export class UIManager {
         if (id === 'screen-upgrades') this.renderUpgrades();
         if (id === 'screen-axes') this.renderAxes();
         if (id === 'screen-forest') this.updateForestUI();
+        if (id === 'screen-map') this.renderMap();
+        if (id === 'screen-pets') this.renderPets();
     }
 
     private updateHUD() {
@@ -181,7 +211,14 @@ export class UIManager {
 
         let baseDmg = 1 + (state.upgrades['upg_strength'] || 0) * UPGRADES.upg_strength.effectPerLevel;
         let critChance = (state.upgrades['upg_luck'] || 0) * UPGRADES.upg_luck.effectPerLevel + (axe.critBonus || 0);
-        this.axePowerLabel.textContent = `Base Dmg: ${Math.floor(baseDmg)} | Crit: ${Math.floor(critChance * 100)}%`;
+
+        let powerText = `Base Dmg: ${Math.floor(baseDmg)} | Crit: ${Math.floor(critChance * 100)}%`;
+        if (state.equippedCompanionId) {
+            const petDps = companionSystem.getActiveDPS();
+            powerText += ` | Pet DPS: ${Math.floor(petDps)}`;
+        }
+
+        this.axePowerLabel.textContent = powerText;
     }
 
     private renderTree() {
@@ -310,6 +347,116 @@ export class UIManager {
             rateLabel.textContent = `${this.formatNum(forestSystem.getWoodPerSecond())} 🪵 / sec`;
         } else {
             rateLabel.textContent = 'Locked (Collect 200 Wood)';
+        }
+    }
+
+    private renderMap() {
+        const list = document.getElementById('map-list')!;
+        list.innerHTML = '';
+
+        for (const biome of Object.values(BIOMES)) {
+            const isUnlocked = biomeSystem.isUnlocked(biome.id);
+            const isActive = state.activeBiomeId === biome.id;
+            const canAfford = biomeSystem.canAfford(biome.id);
+
+            const el = document.createElement('div');
+            el.className = `map-item ${isUnlocked ? 'unlocked' : ''} ${isActive ? 'active-biome' : ''}`;
+
+            let costStr = '';
+            if (!isUnlocked) {
+                costStr = biome.unlockCost.map(c => `${c.amount} ${WOODS[c.woodTypeId].name}`).join(', ');
+                if (costStr === '') costStr = 'Free';
+            }
+
+            el.innerHTML = `
+        <div class="upgrade-info">
+          <span class="upgrade-name">${biome.emoji} ${biome.name}</span>
+          <span class="upgrade-desc">${biome.description}</span>
+          ${!isUnlocked ? `<span class="upgrade-level">Cost: ${costStr}</span>` : ''}
+        </div>
+        <button class="upgrade-buy-btn" ${(isActive || (!isUnlocked && !canAfford)) ? 'disabled' : ''}>
+          ${isActive ? 'CURRENT' : (isUnlocked ? 'TRAVEL' : 'UNLOCK')}
+        </button>
+      `;
+
+            if (!isActive) {
+                el.querySelector('button')!.addEventListener('click', () => {
+                    if (isUnlocked) {
+                        if (biomeSystem.travelTo(biome.id)) {
+                            this.playHaptic('heavy');
+                            this.switchScreen('screen-chop'); // Auto close map!
+                        }
+                    } else if (biomeSystem.unlock(biome.id)) {
+                        this.playHaptic('success');
+                        this.renderMap();
+                    }
+                });
+            }
+
+            list.appendChild(el);
+        }
+    }
+
+    private renderPets() {
+        const list = document.getElementById('pets-list')!;
+        list.innerHTML = '';
+
+        for (const comp of Object.values(COMPANIONS)) {
+            const isUnlocked = companionSystem.isUnlocked(comp.id);
+            const isEquipped = state.equippedCompanionId === comp.id;
+            const level = companionSystem.getLevel(comp.id);
+            const isMax = level >= comp.maxLevel;
+
+            const canAffordUnlock = !isUnlocked && companionSystem.canAffordUnlock(comp.id);
+            const canAffordLevel = isUnlocked && !isMax && companionSystem.canAffordLevelUp(comp.id);
+
+            const el = document.createElement('div');
+            el.className = `upgrade-item ${isEquipped ? 'active-biome' : ''}`;
+
+            let costStr = '';
+            if (!isUnlocked) {
+                costStr = comp.unlockCost.map(c => `${c.amount} ${WOODS[c.woodTypeId].name}`).join(', ');
+            } else if (!isMax) {
+                costStr = `${companionSystem.getCostToLevelUp(comp.id)} 🪵`;
+            }
+
+            el.innerHTML = `
+        <div class="upgrade-info">
+          <span class="upgrade-name">${comp.emoji} ${comp.name} ${isUnlocked ? `<span class="upgrade-level">Lv.${level}/${comp.maxLevel}</span>` : ''}</span>
+          <span class="upgrade-desc">${comp.description}</span>
+          ${(!isUnlocked || !isMax) ? `<span class="upgrade-level">Cost: ${costStr}</span>` : ''}
+        </div>
+        <div style="display: flex; gap: 5px; flex-direction: column;">
+            ${isUnlocked ? `
+                <button class="upgrade-buy-btn" ${isEquipped ? 'disabled' : ''} data-action="equip">
+                ${isEquipped ? 'EQUIPPED' : 'EQUIP'}
+                </button>
+            ` : ''}
+            <button class="upgrade-buy-btn" ${(!isUnlocked && !canAffordUnlock) || (isUnlocked && (!canAffordLevel || isMax)) ? 'disabled' : ''} data-action="upgrade">
+            ${isUnlocked ? (isMax ? 'MAXED' : 'LEVEL UP') : 'UNLOCK'}
+            </button>
+        </div>
+      `;
+
+            if (isUnlocked && !isEquipped) {
+                el.querySelector('button[data-action="equip"]')!.addEventListener('click', () => {
+                    companionSystem.equip(comp.id);
+                    this.playHaptic('light');
+                });
+            }
+
+            const upgBtn = el.querySelector('button[data-action="upgrade"]');
+            if (upgBtn && !upgBtn.hasAttribute('disabled')) {
+                upgBtn.addEventListener('click', () => {
+                    if (!isUnlocked) {
+                        if (companionSystem.unlock(comp.id)) this.playHaptic('success');
+                    } else if (!isMax) {
+                        if (companionSystem.levelUp(comp.id)) this.playHaptic('light');
+                    }
+                });
+            }
+
+            list.appendChild(el);
         }
     }
 

@@ -1,9 +1,11 @@
+export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'spooky_wood' | 'glacier_sap' | string;
+
 import { WoodType } from '../core/types';
 
 export const WOODS: Record<string, WoodType> = {
     basic: {
         id: 'basic',
-        name: 'Basic Wood',
+        name: 'Birch Wood',
         valueMultiplier: 1,
         rarity: 'common',
     },
@@ -22,7 +24,19 @@ export const WOODS: Record<string, WoodType> = {
     rare_amber: {
         id: 'rare_amber',
         name: 'Amber',
-        valueMultiplier: 50,
+        valueMultiplier: 100,
+        rarity: 'legendary',
+    },
+    spooky_wood: {
+        id: 'spooky_wood',
+        name: 'Ghostwood',
+        valueMultiplier: 500,
+        rarity: 'rare',
+    },
+    glacier_sap: {
+        id: 'glacier_sap',
+        name: 'Glacier Sap',
+        valueMultiplier: 2500,
         rarity: 'epic',
-    }
+    },
 };

@@ -37,6 +37,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* Fallback for older browsers */
+  height: 100dvh;
   width: 100vw;
   max-width: 600px;
   margin: 0 auto;
@@ -295,8 +297,9 @@ body {
   gap: 10px;
 }
 
-/* Upgrade Item */
-.upgrade-item {
+/* Upgrade / Generic Item */
+.upgrade-item,
+.map-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -305,6 +308,19 @@ body {
   border-radius: 8px;
   border: 1px solid #202225;
 }
+
+.map-item.unlocked {
+  border-color: var(--accent-color);
+  background-color: rgba(114, 137, 218, 0.1);
+}
+
+.map-item.active-biome {
+  border-color: var(--wood-color);
+  background-color: rgba(209, 154, 102, 0.2);
+  box-shadow: 0 0 10px rgba(209, 154, 102, 0.5);
+}
+
+
 
 .upgrade-info {
   display: flex;
@@ -379,9 +395,6 @@ body {
 
 /* Settings */
 #btn-settings-open {
-  position: absolute;
-  top: 15px;
-  right: 15px;
   background: none;
   border: none;
   font-size: 1.5rem;

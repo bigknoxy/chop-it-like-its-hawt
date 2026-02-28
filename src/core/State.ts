@@ -17,6 +17,13 @@ export const createInitialState = (): PlayerState => ({
         multiplierFromUpgrades: 1,
         lastTickTimestamp: Date.now(),
     },
+
+    // V2
+    activeBiomeId: 'home_forest',
+    unlockedBiomes: ['home_forest'],
+    equippedCompanionId: null,
+    companions: {},
+
     lastSaveTimestamp: Date.now(),
 });
 

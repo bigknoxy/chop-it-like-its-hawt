@@ -21,9 +21,12 @@
         </div>
         <!-- Rare woods can be appended here dynamically -->
       </div>
-      <div class="axe-stats">
-        <span id="ui-equipped-axe">Rusty Axe</span>
-        <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="axe-stats">
+          <span id="ui-equipped-axe">Rusty Axe</span>
+          <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
+        </div>
+        <button id="btn-settings-open" title="Settings">⚙️</button>
       </div>
     </header>
 
@@ -71,6 +74,21 @@
           </div>
         </div>
       </section>
+      <!-- Map Screen -->
+      <section id="screen-map" class="screen hidden">
+        <h2>World Map</h2>
+        <div id="map-list" class="scrollable-list">
+          <!-- Dynamic biome items go here -->
+        </div>
+      </section>
+
+      <!-- Pets Screen -->
+      <section id="screen-pets" class="screen hidden">
+        <h2>Companions</h2>
+        <div id="pets-list" class="scrollable-list">
+          <!-- Dynamic pet items go here -->
+        </div>
+      </section>
     </main>
 
     <!-- Bottom Navigation -->
@@ -78,6 +96,8 @@
       <button class="nav-button active" data-target="screen-chop">🪓<br>Chop</button>
       <button class="nav-button" data-target="screen-upgrades">💪<br>Upgrades</button>
       <button class="nav-button" data-target="screen-axes">🗡️<br>Axes</button>
+      <button class="nav-button" data-target="screen-pets">🐻<br>Pets</button>
+      <button class="nav-button" data-target="screen-map">🗺️<br>Map</button>
       <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
     </nav>
 
@@ -100,7 +120,6 @@
         <button id="btn-close-about">Close</button>
       </div>
     </div>
-    <button id="btn-settings-open">⚙️</button>
   </div>
 
   <script type="module" src="/src/main.ts"></script>

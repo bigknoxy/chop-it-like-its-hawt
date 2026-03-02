@@ -90,7 +90,7 @@ Based on market research of incremental games in 2024-2025, including analysis o
 
 ---
 
-## Priority 5: Tree Special Mechanics (Planned)
+## Priority 5: Tree Special Mechanics (Complete)
 
 ### Design
 - **chest:** Drops random bonus resources (golden acorns, rare seeds)

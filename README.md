@@ -67,6 +67,7 @@ src/
 - 🌲 Forest rebirth prestige bonuses
 - 💎 Crystal Caverns biome and rare woods
 - 📦 Wood inventory UI
+- ✨ Tree special mechanics (timed rush, multi-phase, bonus chests)
 - 💾 Auto-save functionality
 - 📱 Mobile-friendly touch controls
 

@@ -36,7 +36,30 @@ export const TREES: Record<string, TreeDefinition> = {
         baseWoodYield: 5,
         woodTypeId: 'rare_amber',
         spawnWeight: 3,
+        specialMechanic: 'chest',
         emoji: '✨'
+    },
+    tree_rush: {
+        id: 'tree_rush',
+        name: 'Rush Birch',
+        maxHP: 60,
+        baseWoodYield: 8,
+        woodTypeId: 'basic',
+        spawnWeight: 20,
+        specialMechanic: 'timed',
+        phaseCount: 1,
+        emoji: '⚡'
+    },
+    tree_elder: {
+        id: 'tree_elder',
+        name: 'Elder Oak',
+        maxHP: 600,
+        baseWoodYield: 20,
+        woodTypeId: 'oak',
+        spawnWeight: 12,
+        specialMechanic: 'multiPhase',
+        phaseCount: 3,
+        emoji: '🌳'
     },
     crystal_oak: {
         id: 'crystal_oak',

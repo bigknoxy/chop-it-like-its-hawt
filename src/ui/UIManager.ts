@@ -16,7 +16,12 @@ export class UIManager {
     private woodAmountLabel = document.querySelector('.wood-amount')!;
     private axeNameLabel = document.getElementById('ui-equipped-axe')!;
     private axePowerLabel = document.getElementById('ui-axe-power')!;
+    private specialIndicator = document.getElementById('special-indicator')!;
+    private timerDisplay = document.getElementById('timer-display')!;
+    private phaseDisplay = document.getElementById('phase-display')!;
     private curScreenId = 'screen-chop';
+    private timerInterval: number | null = null;
+    private chestTimeout: number | null = null;
 
     // Settings
     public hapticsEnabled = true;
@@ -80,10 +85,18 @@ export class UIManager {
             this.playHaptic(isCrit ? 'heavy' : 'light');
         };
 
-        ChopEvents.onTreeFall = (amt, woodId) => {
+        ChopEvents.onTreeFall = (amt, woodId, specialResult) => {
             this.animateTreeFall();
             this.spawnRewardNumber(amt, woodId);
             this.playHaptic('success');
+            this.clearTimer();
+            if (specialResult?.type === 'timed' && specialResult.isTimedBonus) {
+                this.showSpecialToast('Timed bonus! Extra wood!');
+            }
+            if (specialResult?.type === 'chest') {
+                this.showSpecialToast('Chest jackpot!');
+                this.triggerChestPulse();
+            }
             // Delay rendering next tree
             setTimeout(() => this.renderTree(), 500);
             this.checkUnlocks();
@@ -119,6 +132,16 @@ export class UIManager {
         SaveEvents.onOfflineGains = (amount) => {
             alert(`Welcome back! Your idle workers collected ${amount} Basic Wood while you were away.`);
             this.updateHUD();
+        };
+
+        ChopEvents.onPhaseChange = (phase, maxPhases) => {
+            this.updatePhaseIndicator(phase, maxPhases);
+            this.showSpecialToast(`Phase ${phase}/${maxPhases}!`);
+        };
+
+        ChopEvents.onChestOpen = () => {
+            this.showSpecialToast('Chest opened! Bonus wood!');
+            this.triggerChestPulse();
         };
 
         // Settings
@@ -228,15 +251,105 @@ export class UIManager {
 
         this.treeSprite.style.filter = `hue-rotate(${hueRotate})`;
         this.treeSprite.classList.remove('tree-fall');
+        this.treeSprite.classList.remove('chest-pulse');
         this.treeSprite.style.opacity = '1';
 
         this.updateHPBar();
+        this.resetSpecialIndicators();
+        this.startSpecialUI(def);
     }
 
     private updateHPBar() {
         const def = TREES[currentTree.defId];
         const pct = Math.max(0, currentTree.currentHP / def.maxHP) * 100;
         this.hpBarFill.style.width = `${pct}%`;
+    }
+
+    private startSpecialUI(def: typeof TREES[string]) {
+        this.clearTimer();
+        this.timerDisplay.classList.add('hidden');
+        this.phaseDisplay.classList.add('hidden');
+
+        if (def.specialMechanic === 'timed') {
+            if (!currentTree.spawnTime) {
+                currentTree.spawnTime = Date.now();
+            }
+            this.timerDisplay.classList.remove('hidden');
+            this.timerDisplay.textContent = '15.0s';
+            this.startTimerCountdown();
+        }
+
+        if (def.specialMechanic === 'multiPhase') {
+            const maxPhases = def.phaseCount || 1;
+            const phase = currentTree.currentPhase || maxPhases;
+            this.updatePhaseIndicator(phase, maxPhases);
+            this.phaseDisplay.classList.remove('hidden');
+        }
+    }
+
+    private startTimerCountdown() {
+        if (!currentTree.spawnTime) return;
+        const durationMs = 15000;
+
+        const update = () => {
+            if (!currentTree.spawnTime) return;
+            const elapsed = Date.now() - currentTree.spawnTime;
+            const remaining = Math.max(0, durationMs - elapsed);
+            const seconds = (remaining / 1000).toFixed(1);
+            this.timerDisplay.textContent = `${seconds}s`;
+
+            if (remaining <= 0) {
+                this.timerDisplay.classList.add('expired');
+                this.clearTimer();
+                return;
+            }
+
+            this.timerDisplay.classList.remove('expired');
+        };
+
+        update();
+        this.timerInterval = window.setInterval(update, 100);
+    }
+
+    private updatePhaseIndicator(phase: number, maxPhases: number) {
+        this.phaseDisplay.textContent = `Phase ${phase}/${maxPhases}`;
+    }
+
+    private showSpecialToast(message: string) {
+        this.specialIndicator.textContent = message;
+        this.specialIndicator.classList.remove('hidden');
+        this.specialIndicator.classList.remove('special-toast-show');
+
+        void this.specialIndicator.offsetWidth;
+        this.specialIndicator.classList.add('special-toast-show');
+
+        if (this.chestTimeout) {
+            window.clearTimeout(this.chestTimeout);
+        }
+
+        this.chestTimeout = window.setTimeout(() => {
+            this.specialIndicator.classList.add('hidden');
+        }, 2000);
+    }
+
+    private triggerChestPulse() {
+        this.treeSprite.classList.remove('chest-pulse');
+        void this.treeSprite.offsetWidth;
+        this.treeSprite.classList.add('chest-pulse');
+    }
+
+    private resetSpecialIndicators() {
+        this.timerDisplay.classList.remove('expired');
+        this.specialIndicator.classList.add('hidden');
+        this.phaseDisplay.classList.add('hidden');
+        this.clearTimer();
+    }
+
+    private clearTimer() {
+        if (this.timerInterval !== null) {
+            window.clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
     }
 
     private checkUnlocks() {

@@ -31,12 +31,15 @@ export interface TreeDefinition {
   emoji: string;
   specialMechanic?: 'chest' | 'timed' | 'multiPhase' | string;
   biome?: BiomeId;
+  phaseCount?: number;
 }
 
 export interface TreeInstance {
   defId: string;
   currentHP: number;
   isActive: boolean;
+  spawnTime?: number;
+  currentPhase?: number;
 }
 
 export type UpgradeEffectType =

@@ -11,10 +11,13 @@ An incremental clicker game where you chop trees, collect wood, upgrade your axe
 ## 🎮 Gameplay
 
 - **Chop trees** - Click or hold to chop down trees and collect wood
-- **Upgrade your axe** - Improve your chopping power with new axes
+- **Upgrade your axe** - Improve your chopping power with new axes and abilities
 - **Unlock upgrades** - Boost strength, crit chance, auto-chop, and more
+- **Explore biomes** - Discover rare woods across unique regions
+- **Prestige your forest** - Rebirth for Growth Essence bonuses
 - **Build your forest** - Earn idle wood while you're away
 - **Complete daily quests** - Claim rewards for chopping, collecting wood value, and upgrades
+- **Earn achievements** - Stack permanent bonuses and skill tree upgrades
 
 ## 🚀 Quick Start
 
@@ -53,6 +56,9 @@ src/
 │   ├── ForestSystem.ts
 │   ├── PrestigeSystem.ts
 │   ├── BiomeSystem.ts
+│   ├── AchievementSystem.ts
+│   ├── QuestSystem.ts
+│   ├── SkillSystem.ts
 │   └── SaveSystem.ts
 ├── ui/             # UI management
 ├── main.ts         # Entry point
@@ -66,14 +72,14 @@ src/
 - 💪 Upgrade system with progression
 - 🌙 Idle forest income
 - 🌲 Forest rebirth prestige bonuses
-- 🏆 Achievement system with permanent AP bonuses
-- 🌳 Growth Essence skill tree bonuses
+- 🧬 Growth Essence skill tree progression
+- 🏆 Achievement system with permanent bonuses
 - 📅 Daily quests and login rewards (7-day loop)
 - 💎 Crystal Caverns biome and rare woods
 - 🌋 Volcanic Grove biome and blazing woods
-- 🗺️ Biome selection UI
-- 📦 Wood inventory UI
-- ✨ Tree special mechanics (timed rush, multi-phase, bonus chests)
+- 🗺️ Biome selection screen
+- 📦 Wood inventory screen
+- ✨ Axe abilities and tree special mechanics (timed rush, multi-phase, bonus chests)
 - 💾 Auto-save functionality
 - 📱 Mobile-friendly touch controls
 

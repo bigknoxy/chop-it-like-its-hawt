@@ -15,11 +15,11 @@ Based on market research of incremental games in 2024-2025, including analysis o
 | **2** | Crystal Caverns biome | Low | High | v1.1.0 |
 | **3** | Wood type inventory UI | Low | Medium | v1.1.0 |
 | **4** | Axe special abilities | Medium | High | v1.1.0 |
-| **5** | Tree special mechanics | Medium | High | v1.1.1 |
-| **6** | Achievement system | Medium | Medium | v1.2.0 |
-| **7** | Volcanic Grove biome | Medium | Medium | v1.2.0 |
-| **8** | Daily quests/rewards | Medium | Medium | v1.3.0 |
-| **9** | Skill tree | High | High | v1.3.0 |
+| **5** | Tree special mechanics | Medium | High | v1.1.0 |
+| **6** | Achievement system | Medium | Medium | v1.1.0 |
+| **7** | Volcanic Grove biome | Medium | Medium | v1.1.0 |
+| **8** | Daily quests/rewards | Medium | Medium | v1.1.0 |
+| **9** | Skill tree | High | High | v1.1.0 |
 
 ---
 
@@ -105,7 +105,7 @@ Based on market research of incremental games in 2024-2025, including analysis o
 
 ---
 
-## Priority 6: Achievement System
+## Priority 6: Achievement System (Complete)
 
 ### Design
 - Track milestones: trees chopped, wood collected, prestiges completed
@@ -119,7 +119,7 @@ Based on market research of incremental games in 2024-2025, including analysis o
 
 ---
 
-## Priority 7: Volcanic Grove Biome
+## Priority 7: Volcanic Grove Biome (Complete)
 
 ### Design
 - **Name:** Volcanic Grove
@@ -134,7 +134,7 @@ Based on market research of incremental games in 2024-2025, including analysis o
 
 ---
 
-## Priority 8: Daily Quests/Rewards
+## Priority 8: Daily Quests/Rewards (Complete)
 
 ### Design
 - 3 daily quests (chop trees, collect wood value, purchase upgrades)
@@ -148,7 +148,7 @@ Based on market research of incremental games in 2024-2025, including analysis o
 
 ---
 
-## Priority 9: Skill Tree
+## Priority 9: Skill Tree (Complete)
 
 ### Design
 - Permanent upgrades via Growth Essence
@@ -171,15 +171,20 @@ Based on market research of incremental games in 2024-2025, including analysis o
 ### Implemented Features
 - Core chop loop with HP bar, damage numbers
 - 6 upgrades with prerequisites
-- 4 axes with damage multipliers
-- 3 biomes (Home Forest, Haunted Weald, Frozen Tundra) plus Crystal Caverns
+- 4 axes with damage multipliers and special abilities
+- 5 biomes (Home Forest, Haunted Weald, Frozen Tundra, Crystal Caverns, Volcanic Grove)
 - 3 pets (Bob, Willy, Barry)
+- Wood inventory screen
+- Biomes screen with unlock/switch flow
+- Tree special mechanics (chest, timed, multi-phase)
+- Achievement system with permanent bonuses
+- Daily quests and login rewards (7-day loop)
+- Growth Essence skill tree
+- Prestige (Forest Rebirth) with Growth Essence bonuses
 - Offline progress (8hr cap)
 - Save system with autosave
 
 ### Ready to Expand (Already Defined)
-- `specialMechanic` on trees (not implemented)
-- Achievement system scaffolding
-- Volcanic Grove biome content
-- Daily quests/rewards
-- Skill tree
+- More biomes and wood types
+- Additional axe abilities and upgrade tiers
+- Expanded achievement sets and quest pools

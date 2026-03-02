@@ -50,6 +50,8 @@ src/
 │   ├── AxeSystem.ts
 │   ├── UpgradeSystem.ts
 │   ├── ForestSystem.ts
+│   ├── PrestigeSystem.ts
+│   ├── BiomeSystem.ts
 │   └── SaveSystem.ts
 ├── ui/             # UI management
 ├── main.ts         # Entry point
@@ -62,6 +64,9 @@ src/
 - 🪓 Multiple axe types with unique abilities
 - 💪 Upgrade system with progression
 - 🌙 Idle forest income
+- 🌲 Forest rebirth prestige bonuses
+- 💎 Crystal Caverns biome and rare woods
+- 📦 Wood inventory UI
 - 💾 Auto-save functionality
 - 📱 Mobile-friendly touch controls
 

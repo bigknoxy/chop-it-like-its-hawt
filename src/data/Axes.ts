@@ -25,8 +25,8 @@ export const AXES: Record<string, AxeDefinition> = {
         name: 'Steel Double-Bit',
         tier: 3,
         damageMultiplier: 5,
-        critBonus: 0.1, // +10% crit chance
-        specialAbility: 'splashDamage', // Conceptual
+        critBonus: 0.1,
+        specialAbility: 'doubleWood',
         unlockCost: [
             { woodTypeId: 'pine', amount: 500 },
             { woodTypeId: 'oak', amount: 100 },
@@ -37,8 +37,8 @@ export const AXES: Record<string, AxeDefinition> = {
         name: 'Amber Edged Heavy Axe',
         tier: 4,
         damageMultiplier: 15,
-        critBonus: 0.2, // +20% crit chance
-        specialAbility: 'doubleWood',
+        critBonus: 0.2,
+        specialAbility: 'fastTick',
         unlockCost: [
             { woodTypeId: 'oak', amount: 500 },
             { woodTypeId: 'rare_amber', amount: 50 },

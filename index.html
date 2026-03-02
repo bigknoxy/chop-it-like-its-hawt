@@ -19,7 +19,7 @@
           <span class="wood-icon">🪵</span>
           <span class="wood-amount">0</span>
         </div>
-        <!-- Rare woods can be appended here dynamically -->
+        <button id="btn-wood-inventory" class="wood-inventory-btn" title="Wood Inventory">📦</button>
       </div>
       <div class="axe-stats">
         <span id="ui-equipped-axe">Rusty Axe</span>
@@ -88,8 +88,47 @@
         <button id="btn-toggle-sfx">Sound: ON</button>
         <button id="btn-toggle-haptics">Haptics: ON</button>
         <button id="btn-about">About</button>
+        <div id="prestige-section" class="settings-section">
+          <h3>🌲 Forest Rebirth</h3>
+          <div id="prestige-locked-msg">
+            <p>Unlock at 200 total wood earned</p>
+            <p id="prestige-progress">Lifetime Wood: 0 / 200</p>
+          </div>
+          <div id="prestige-unlocked" class="hidden">
+            <p>💎 Growth Essence: <span id="prestige-essence">0</span></p>
+            <p>📈 Production Bonus: <span id="prestige-bonus">+0%</span></p>
+            <p>⚡ Essence on Rebirth: <span id="prestige-preview">0</span></p>
+            <button id="btn-rebirth" class="danger">Rebirth Forest</button>
+          </div>
+        </div>
         <button id="btn-hard-reset" class="danger">Hard Reset</button>
         <button id="btn-close-settings">Close</button>
+      </div>
+    </div>
+    <div id="rebirth-confirm-overlay" class="overlay hidden">
+      <div class="modal">
+        <h2>🌲 Forest Rebirth</h2>
+        <p>You will gain <span id="rebirth-essence-gain">0</span> Growth Essence.</p>
+        <p>Your production multiplier will increase to <span id="rebirth-new-bonus">+0%</span>.</p>
+        <div class="warning-box">
+          <p>⚠️ This will reset:</p>
+          <ul>
+            <li>All wood</li>
+            <li>All upgrades</li>
+            <li>Current tree progress</li>
+            <li>Equipped axe (returns to Rusty)</li>
+          </ul>
+          <p>✅ You keep:</p>
+          <ul>
+            <li>Unlocked axes</li>
+            <li>Growth Essence</li>
+            <li>Forest unlock status</li>
+          </ul>
+        </div>
+        <div class="modal-buttons">
+          <button id="btn-confirm-rebirth">Confirm Rebirth</button>
+          <button id="btn-cancel-rebirth">Cancel</button>
+        </div>
       </div>
     </div>
     <div id="about-overlay" class="overlay hidden">
@@ -98,6 +137,14 @@
         <p>Chop it like it's HAWT</p>
         <p>Version: <span id="game-version">1.0.0</span></p>
         <button id="btn-close-about">Close</button>
+      </div>
+    </div>
+    <div id="wood-inventory-overlay" class="overlay hidden">
+      <div class="modal wood-inventory-modal">
+        <h2>📦 Wood Inventory</h2>
+        <div id="wood-inventory-list" class="wood-inventory-list">
+        </div>
+        <button id="btn-close-wood-inventory">Close</button>
       </div>
     </div>
     <button id="btn-settings-open">⚙️</button>

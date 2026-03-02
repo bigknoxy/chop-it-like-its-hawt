@@ -8,6 +8,7 @@ import { upgradeSystem, UpgradeEvents } from '../systems/UpgradeSystem';
 import { axeSystem, AxeEvents } from '../systems/AxeSystem';
 import { forestSystem, ForestEvents } from '../systems/ForestSystem';
 import { saveSystem, SaveEvents } from '../systems/SaveSystem';
+import { prestigeSystem, PrestigeEvents } from '../systems/PrestigeSystem';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -15,7 +16,6 @@ export class UIManager {
     private woodAmountLabel = document.querySelector('.wood-amount')!;
     private axeNameLabel = document.getElementById('ui-equipped-axe')!;
     private axePowerLabel = document.getElementById('ui-axe-power')!;
-
     private curScreenId = 'screen-chop';
 
     // Settings
@@ -91,8 +91,9 @@ export class UIManager {
 
         ChopEvents.onWoodUpdate = () => {
             this.updateHUD();
-            this.renderUpgrades(); // Re-render to update disabled states
+            this.renderUpgrades();
             this.renderAxes();
+            this.renderWoodInventory();
         };
 
         UpgradeEvents.onUpgradePurchased = () => {
@@ -123,6 +124,16 @@ export class UIManager {
         // Settings
         document.getElementById('btn-settings-open')!.addEventListener('click', () => {
             document.getElementById('settings-overlay')!.classList.remove('hidden');
+            this.updatePrestigeUI();
+        });
+
+        document.getElementById('btn-wood-inventory')!.addEventListener('click', () => {
+            this.renderWoodInventory();
+            document.getElementById('wood-inventory-overlay')!.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-close-wood-inventory')!.addEventListener('click', () => {
+            document.getElementById('wood-inventory-overlay')!.classList.add('hidden');
         });
 
         document.getElementById('btn-close-settings')!.addEventListener('click', () => {
@@ -154,6 +165,22 @@ export class UIManager {
                 saveSystem.hardReset();
             }
         });
+
+        document.getElementById('btn-rebirth')!.addEventListener('click', () => {
+            this.showRebirthConfirm();
+        });
+
+        document.getElementById('btn-confirm-rebirth')!.addEventListener('click', () => {
+            this.handleRebirth();
+        });
+
+        document.getElementById('btn-cancel-rebirth')!.addEventListener('click', () => {
+            document.getElementById('rebirth-confirm-overlay')!.classList.add('hidden');
+        });
+
+        PrestigeEvents.onRebirth = (gained, total) => {
+            this.updatePrestigeUI();
+        };
 
     }
 
@@ -281,10 +308,12 @@ export class UIManager {
                 if (costStr === '') costStr = 'Free';
             }
 
+            const abilityDesc = this.getAbilityDescription(axe.specialAbility);
+
             el.innerHTML = `
         <div class="upgrade-info">
           <span class="upgrade-name">${axe.name}</span>
-          <span class="upgrade-desc">x${axe.damageMultiplier} Dmg${axe.critBonus ? `, +${axe.critBonus * 100}% Crit` : ''}</span>
+          <span class="upgrade-desc">x${axe.damageMultiplier} Dmg${axe.critBonus ? `, +${axe.critBonus * 100}% Crit` : ''}${abilityDesc ? ` | ${abilityDesc}` : ''}</span>
           ${!isOwned ? `<span class="upgrade-level">Cost: ${costStr}</span>` : ''}
         </div>
         <button class="upgrade-buy-btn" ${(isEquipped || (!isOwned && !canAfford)) ? 'disabled' : ''}>
@@ -306,6 +335,33 @@ export class UIManager {
             list.appendChild(el);
         }
     }
+
+    private renderWoodInventory() {
+        const list = document.getElementById('wood-inventory-list')!;
+        list.innerHTML = '';
+
+        const rarityOrder = ['legendary', 'epic', 'rare', 'common'];
+        const sortedWoods = Object.values(WOODS).sort((a, b) => {
+            return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
+        });
+
+        for (const wood of sortedWoods) {
+            const amount = state.woodByType[wood.id] || 0;
+            const el = document.createElement('div');
+            el.className = `wood-item rarity-${wood.rarity}`;
+
+            el.innerHTML = `
+                <div class="wood-item-info">
+                    <span class="wood-item-name">${wood.name}</span>
+                    <span class="wood-item-value">x${wood.valueMultiplier} value</span>
+                </div>
+                <div class="wood-item-amount">${this.formatNum(amount)}</div>
+            `;
+
+            list.appendChild(el);
+        }
+    }
+
 
     private updateForestUI() {
         const rateLabel = document.getElementById('ui-idle-rate')!;
@@ -364,6 +420,65 @@ export class UIManager {
         if (type === 'light') navigator.vibrate(10);
         if (type === 'heavy') navigator.vibrate([20, 10, 20]);
         if (type === 'success') navigator.vibrate([10, 30, 10, 30, 10]);
+    }
+
+    private updatePrestigeUI(): void {
+        const locked = document.getElementById('prestige-locked-msg')!;
+        const unlocked = document.getElementById('prestige-unlocked')!;
+
+        if (!prestigeSystem.isUnlocked()) {
+            locked.classList.remove('hidden');
+            unlocked.classList.add('hidden');
+            document.getElementById('prestige-progress')!.textContent =
+                `Lifetime Wood: ${this.formatNum(state.prestige.lifetimeWood)} / 200`;
+            return;
+        }
+
+        locked.classList.add('hidden');
+        unlocked.classList.remove('hidden');
+
+        document.getElementById('prestige-essence')!.textContent =
+            this.formatNum(state.prestige.growthEssence);
+        document.getElementById('prestige-bonus')!.textContent =
+            `+${Math.floor((prestigeSystem.getMultiplier() - 1) * 100)}%`;
+        document.getElementById('prestige-preview')!.textContent =
+            this.formatNum(prestigeSystem.getPreviewEssence());
+    }
+
+    private showRebirthConfirm(): void {
+        const essenceGain = prestigeSystem.getPreviewEssence();
+        const newMultiplier = 1 + ((state.prestige.growthEssence + essenceGain) * 0.01);
+
+        document.getElementById('rebirth-essence-gain')!.textContent =
+            this.formatNum(essenceGain);
+        document.getElementById('rebirth-new-bonus')!.textContent =
+            `+${Math.floor((newMultiplier - 1) * 100)}%`;
+
+        document.getElementById('rebirth-confirm-overlay')!.classList.remove('hidden');
+    }
+
+    private handleRebirth(): void {
+        const essenceGain = prestigeSystem.getPreviewEssence();
+        if (prestigeSystem.performRebirth()) {
+            document.getElementById('rebirth-confirm-overlay')!.classList.add('hidden');
+            document.getElementById('settings-overlay')!.classList.add('hidden');
+            alert(`Forest Reborn! Gained ${this.formatNum(essenceGain)} Growth Essence.`);
+            this.updateHUD();
+            this.renderTree();
+            this.renderUpgrades();
+            this.renderAxes();
+            this.updatePrestigeUI();
+            this.checkUnlocks();
+        }
+    }
+
+    private getAbilityDescription(ability?: string): string {
+        switch (ability) {
+            case 'doubleWood': return '20% double yield';
+            case 'splashDamage': return '10% splash damage';
+            case 'fastTick': return '50% faster';
+            default: return '';
+        }
     }
 
     private formatNum(n: number) {

@@ -36,8 +36,37 @@ export const TREES: Record<string, TreeDefinition> = {
         baseWoodYield: 5,
         woodTypeId: 'rare_amber',
         spawnWeight: 3,
-        specialMechanic: 'chest',
         emoji: '✨'
+    },
+    crystal_oak: {
+        id: 'crystal_oak',
+        name: 'Crystal Oak',
+        maxHP: 500,
+        baseWoodYield: 12,
+        woodTypeId: 'crystal_shard',
+        spawnWeight: 50,
+        biome: 'crystal_caverns',
+        emoji: '💎'
+    },
+    gem_willow: {
+        id: 'gem_willow',
+        name: 'Gem Willow',
+        maxHP: 1200,
+        baseWoodYield: 8,
+        woodTypeId: 'gemstone',
+        spawnWeight: 25,
+        biome: 'crystal_caverns',
+        emoji: '💠'
+    },
+    diamond_pine: {
+        id: 'diamond_pine',
+        name: 'Diamond Pine',
+        maxHP: 3000,
+        baseWoodYield: 6,
+        woodTypeId: 'diamond_dust',
+        spawnWeight: 10,
+        biome: 'crystal_caverns',
+        emoji: '🔷'
     }
 };
 

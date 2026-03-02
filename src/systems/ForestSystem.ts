@@ -1,5 +1,6 @@
 import { state } from '../core/State';
 import { UPGRADES } from '../data/Upgrades';
+import { prestigeSystem } from './PrestigeSystem';
 
 export const ForestEvents = {
     onWoodGenerated: (amount: number) => { },
@@ -15,7 +16,7 @@ export class ForestSystem {
         const effLevel = state.upgrades['upg_forest_efficiency'] || 0;
         const multiplier = 1 + (effLevel * UPGRADES.upg_forest_efficiency.effectPerLevel);
 
-        return base * multiplier;
+        return base * multiplier * prestigeSystem.getMultiplier();
     }
 
     public update() {
@@ -35,6 +36,8 @@ export class ForestSystem {
             // Add to basic wood for idle gains (could expand to random wood types)
             state.woodByType['basic'] += gained;
             state.totalWood += gained;
+
+            prestigeSystem.addLifetimeWood(gained);
 
             ForestEvents.onWoodGenerated(gained);
         }
@@ -60,7 +63,9 @@ export class ForestSystem {
             state.totalWood += gained;
             state.forest.lastTickTimestamp = now;
 
-            return gained; // Return amount to show offline modal
+            prestigeSystem.addLifetimeWood(gained);
+
+            return gained;
         }
         return 0;
     }

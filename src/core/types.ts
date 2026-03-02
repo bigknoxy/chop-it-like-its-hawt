@@ -1,4 +1,18 @@
-export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | string;
+export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'crystal_shard' | 'gemstone' | 'diamond_dust' | string;
+
+export type BiomeId = 'default' | 'crystal_caverns' | string;
+
+export interface BiomeDefinition {
+    id: BiomeId;
+    name: string;
+    description: string;
+    unlockCost: {
+        wood?: { amount: number };
+        growthEssence?: number;
+    };
+    allowedTrees: string[];
+    emoji: string;
+}
 
 export interface WoodType {
   id: WoodTypeId;
@@ -16,6 +30,7 @@ export interface TreeDefinition {
   spawnWeight: number;
   emoji: string;
   specialMechanic?: 'chest' | 'timed' | 'multiPhase' | string;
+  biome?: BiomeId;
 }
 
 export interface TreeInstance {
@@ -62,6 +77,18 @@ export interface ForestState {
   lastTickTimestamp: number;
 }
 
+export interface PrestigeState {
+  growthEssence: number;
+  lifetimeWood: number;
+  totalRebirths: number;
+  lastRebirthTimestamp: number;
+}
+
+export interface BiomeState {
+  currentBiomeId: BiomeId;
+  unlockedBiomes: BiomeId[];
+}
+
 export interface PlayerState {
   totalWood: number;
   woodByType: Record<WoodTypeId, number>;
@@ -69,5 +96,7 @@ export interface PlayerState {
   ownedAxes: string[];
   equippedAxeId: string;
   forest: ForestState;
+  prestige: PrestigeState;
+  biome: BiomeState;
   lastSaveTimestamp: number;
 }

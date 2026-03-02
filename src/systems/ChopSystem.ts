@@ -3,6 +3,8 @@ import { TREES } from '../data/Trees';
 import { AXES } from '../data/Axes';
 import { UPGRADES } from '../data/Upgrades';
 import { WOODS } from '../data/Woods';
+import { prestigeSystem } from './PrestigeSystem';
+import { biomeSystem } from './BiomeSystem';
 
 // Events to notify UI
 export const ChopEvents = {
@@ -13,7 +15,7 @@ export const ChopEvents = {
 
 export class ChopSystem {
     private lastHitTime: number = 0;
-    private hitIntervalMs: number = 100; // 10 hits per second while holding
+    private baseHitIntervalMs: number = 100;
     private isHolding: boolean = false;
 
     private getDamage(): { amount: number; isCrit: boolean } {
@@ -30,6 +32,8 @@ export class ChopSystem {
         // Axe
         const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
         baseDamage *= axe.damageMultiplier;
+
+        baseDamage *= prestigeSystem.getMultiplier();
 
         // Crit
         const upgLuckLvl = state.upgrades['upg_luck'] || 0;
@@ -69,7 +73,8 @@ export class ChopSystem {
         // Handle Holding
         if (this.isHolding) {
             const now = performance.now();
-            if (now - this.lastHitTime >= this.hitIntervalMs) {
+            const hitIntervalMs = this.getHitIntervalMs();
+            if (now - this.lastHitTime >= hitIntervalMs) {
                 this.hit();
             }
         }
@@ -82,9 +87,16 @@ export class ChopSystem {
         ChopEvents.onDamage(amount, isCrit);
     }
 
+    private getHitIntervalMs(): number {
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === 'fastTick') {
+            return this.baseHitIntervalMs * 0.5;
+        }
+        return this.baseHitIntervalMs;
+    }
+
     private applyDamage(amount: number, isCrit: boolean) {
         if (!currentTree.isActive) return;
-
         currentTree.currentHP -= amount;
 
         if (currentTree.currentHP <= 0) {
@@ -97,41 +109,45 @@ export class ChopSystem {
         currentTree.isActive = false;
 
         const def = TREES[currentTree.defId];
-
-        // Calculate Reward
         let woodGain = def.baseWoodYield;
         const upgAxeSizeLvl = state.upgrades['upg_axe_size'] || 0;
-        // axe size gives slight yield boost: 2% per level? PRD says "slightly boosts yield"
         woodGain *= 1 + (upgAxeSizeLvl * 0.02);
 
-        // Wood value multiplier (handled at currency addition, or pre-calculated)
-        // Actually PRD says woodGain = baseWoodYield * (1+bonus) * valueMultiplier.
-        // valueMultiplier makes the amount bigger? Oh, "wood types act as currencies". The resource count goes up physically by the multiplier or it goes to `woodByType` container.
-        // Let's just grant a quantity of that specific wood type. The valueMultiplier is typically for selling, but let's add raw amount.
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === 'doubleWood' && Math.random() < 0.2) {
+            woodGain *= 2;
+        }
+
         woodGain = Math.ceil(woodGain);
 
-        // Add to state
         state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
 
-        // Also increase total wood generically based on value multiplier?
         const woodDef = WOODS[def.woodTypeId];
         const totalAdded = woodGain * woodDef.valueMultiplier;
         state.totalWood += totalAdded;
 
+        prestigeSystem.addLifetimeWood(totalAdded);
+
         ChopEvents.onTreeFall(woodGain, def.woodTypeId);
         ChopEvents.onWoodUpdate();
 
-        // Spawn next tree
-        setTimeout(() => this.spawnNextTree(), 500); // Wait for fall animation
+        setTimeout(() => this.spawnNextTree(), 500);
     }
 
     private spawnNextTree() {
-        // Weighted random selection
-        const totalWeight = Object.values(TREES).reduce((sum, def) => sum + def.spawnWeight, 0);
+        const allowedTrees = biomeSystem.getAllowedTrees();
+
+        const totalWeight = allowedTrees.reduce((sum, treeId) => {
+            const tree = TREES[treeId];
+            return sum + (tree ? tree.spawnWeight : 0);
+        }, 0);
+
         let rand = Math.random() * totalWeight;
 
-        let selectedId = 'tree_basic';
-        for (const tree of Object.values(TREES)) {
+        let selectedId = allowedTrees[0] || 'tree_basic';
+        for (const treeId of allowedTrees) {
+            const tree = TREES[treeId];
+            if (!tree) continue;
             if (rand < tree.spawnWeight) {
                 selectedId = tree.id;
                 break;
@@ -139,9 +155,10 @@ export class ChopSystem {
             rand -= tree.spawnWeight;
         }
 
+        const def = TREES[selectedId];
         setCurrentTree({
             defId: selectedId,
-            currentHP: TREES[selectedId].maxHP,
+            currentHP: def.maxHP,
             isActive: true,
         });
     }

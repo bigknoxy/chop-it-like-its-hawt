@@ -139,6 +139,32 @@ export interface DailyState {
   login: DailyLoginState;
 }
 
+export type SkillBranch = 'chopping' | 'collection' | 'automation' | 'luck';
+
+export interface SkillBonuses {
+  damagePct?: number;
+  woodValuePct?: number;
+  autoChopPct?: number;
+  critChancePct?: number;
+}
+
+export type SkillId = string;
+
+export interface SkillDefinition {
+  id: SkillId;
+  name: string;
+  description: string;
+  branch: SkillBranch;
+  cost: number;
+  requires?: SkillId[];
+  bonuses: SkillBonuses;
+}
+
+export interface SkillState {
+  unlocked: Record<SkillId, boolean>;
+  totalSpent: number;
+}
+
 export interface PlayerState {
   totalWood: number;
   woodByType: Record<WoodTypeId, number>;
@@ -149,6 +175,7 @@ export interface PlayerState {
   prestige: PrestigeState;
   biome: BiomeState;
   achievements: AchievementState;
+  skills: SkillState;
   daily: DailyState;
   lastSaveTimestamp: number;
 }

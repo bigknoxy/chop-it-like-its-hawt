@@ -159,6 +159,10 @@ Based on market research of incremental games in 2024-2025, including analysis o
 - `src/data/Skills.ts` - Skill definitions
 - `src/systems/SkillSystem.ts` - Manage skill points
 - `src/ui/UIManager.ts` - Skill tree display
+- `src/core/types.ts` - Skill types/state
+- `src/core/State.ts` - Skill state initialization
+- `index.html` - Skill tree screen + navigation
+- `src/style.css` - Skill tree styles
 
 ---
 

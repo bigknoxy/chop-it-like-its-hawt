@@ -7,6 +7,7 @@ import { prestigeSystem } from './PrestigeSystem';
 import { biomeSystem } from './BiomeSystem';
 import { achievementSystem } from './AchievementSystem';
 import { questSystem } from './QuestSystem';
+import { skillSystem } from './SkillSystem';
 
 export type SpecialMechanicResult = {
     type: 'chest' | 'timed' | 'multiPhase' | null;
@@ -48,10 +49,14 @@ export class ChopSystem {
 
         baseDamage *= prestigeSystem.getMultiplier();
 
+        const skillBonuses = skillSystem.getTotalBonuses();
+        baseDamage *= 1 + (skillBonuses.damagePct || 0);
+
         // Crit
         const upgLuckLvl = state.upgrades['upg_luck'] || 0;
         let critChance = upgLuckLvl * UPGRADES.upg_luck.effectPerLevel;
         critChance += axe.critBonus || 0;
+        critChance += skillBonuses.critChancePct || 0;
 
         let isCrit = Math.random() < critChance;
 
@@ -80,7 +85,9 @@ export class ChopSystem {
         const autoChopLvl = state.upgrades['upg_autochop'] || 0;
         if (autoChopLvl > 0) {
             const autoDps = autoChopLvl * UPGRADES.upg_autochop.effectPerLevel;
-            this.applyDamage(autoDps * dt, false);
+            const skillBonuses = skillSystem.getTotalBonuses();
+            const bonusMultiplier = 1 + (skillBonuses.autoChopPct || 0);
+            this.applyDamage(autoDps * dt * bonusMultiplier, false);
         }
 
         // Handle Holding
@@ -199,7 +206,9 @@ export class ChopSystem {
         state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
 
         const woodDef = WOODS[def.woodTypeId];
-        const totalAdded = woodGain * woodDef.valueMultiplier;
+        const skillBonuses = skillSystem.getTotalBonuses();
+        const valueMultiplier = woodDef.valueMultiplier * (1 + (skillBonuses.woodValuePct || 0));
+        const totalAdded = woodGain * valueMultiplier;
         state.totalWood += totalAdded;
         achievementSystem.addProgress('woodCollected', totalAdded);
         questSystem.addProgress('woodCollected', totalAdded);

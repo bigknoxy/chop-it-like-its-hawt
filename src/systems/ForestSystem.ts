@@ -3,6 +3,7 @@ import { UPGRADES } from '../data/Upgrades';
 import { prestigeSystem } from './PrestigeSystem';
 import { achievementSystem } from './AchievementSystem';
 import { questSystem } from './QuestSystem';
+import { skillSystem } from './SkillSystem';
 
 export const ForestEvents = {
     onWoodGenerated: (amount: number) => { },
@@ -18,7 +19,9 @@ export class ForestSystem {
         const effLevel = state.upgrades['upg_forest_efficiency'] || 0;
         const multiplier = 1 + (effLevel * UPGRADES.upg_forest_efficiency.effectPerLevel);
 
-        return base * multiplier * prestigeSystem.getMultiplier();
+        const skillBonuses = skillSystem.getTotalBonuses();
+        const valueMultiplier = 1 + (skillBonuses.woodValuePct || 0);
+        return base * multiplier * prestigeSystem.getMultiplier() * valueMultiplier;
     }
 
     public update() {

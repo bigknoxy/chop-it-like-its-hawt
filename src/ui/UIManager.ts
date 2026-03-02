@@ -11,6 +11,7 @@ import { saveSystem, SaveEvents } from '../systems/SaveSystem';
 import { prestigeSystem, PrestigeEvents } from '../systems/PrestigeSystem';
 import { achievementSystem, AchievementEvents } from '../systems/AchievementSystem';
 import { questSystem, QuestEvents } from '../systems/QuestSystem';
+import { skillSystem, SkillEvents } from '../systems/SkillSystem';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -48,6 +49,14 @@ export class UIManager {
         return document.getElementById('daily-login-claim') as HTMLButtonElement | null;
     }
 
+    private getSkillsList(): HTMLElement | null {
+        return document.getElementById('skills-list');
+    }
+
+    private getSkillEssenceLabel(): HTMLElement | null {
+        return document.getElementById('skill-essence');
+    }
+
     // Settings
     public hapticsEnabled = true;
     public soundEnabled = true;
@@ -63,6 +72,8 @@ export class UIManager {
         this.updateAPUI();
         this.renderDaily();
         this.updateDailyLogin();
+        this.renderSkills();
+        this.updateSkillSummary();
     }
 
     public update(dt: number) {
@@ -158,6 +169,12 @@ export class UIManager {
             this.renderAxes();
         };
 
+        PrestigeEvents.onRebirth = () => {
+            this.updatePrestigeUI();
+            this.updateSkillSummary();
+            this.renderSkills();
+        };
+
         ForestEvents.onWoodGenerated = () => {
             this.updateHUD();
             this.updateAPUI();
@@ -246,6 +263,14 @@ export class UIManager {
             this.switchScreen('screen-daily');
         });
 
+        const skillsBtn = document.getElementById('btn-skills-open');
+        if (skillsBtn) {
+            skillsBtn.addEventListener('click', () => {
+                document.getElementById('settings-overlay')!.classList.add('hidden');
+                this.switchScreen('screen-skills');
+            });
+        }
+
         const loginBtn = this.getDailyLoginButton();
         if (loginBtn) {
             loginBtn.addEventListener('click', () => {
@@ -256,10 +281,6 @@ export class UIManager {
             });
         }
 
-
-        PrestigeEvents.onRebirth = (gained, total) => {
-            this.updatePrestigeUI();
-        };
 
         AchievementEvents.onAchievementUnlocked = () => {
             this.renderAchievements();
@@ -305,6 +326,16 @@ export class UIManager {
             this.updateDailyLogin();
         };
 
+        SkillEvents.onSkillUnlocked = () => {
+            this.updateHUD();
+            this.renderSkills();
+            this.updateSkillSummary();
+        };
+
+        SkillEvents.onSkillPointsUpdated = () => {
+            this.updateSkillSummary();
+        };
+
     }
 
     private switchScreen(id: string) {
@@ -332,6 +363,10 @@ export class UIManager {
             this.renderDaily();
             this.updateDailyLogin();
         }
+        if (id === 'screen-skills') {
+            this.renderSkills();
+            this.updateSkillSummary();
+        }
     }
 
     private updateHUD() {
@@ -341,10 +376,16 @@ export class UIManager {
         this.axeNameLabel.textContent = axe.name;
 
         let baseDmg = 1 + (state.upgrades['upg_strength'] || 0) * UPGRADES.upg_strength.effectPerLevel;
+        const skillBonuses = skillSystem.getTotalBonuses();
+        baseDmg *= 1 + (skillBonuses.damagePct || 0);
         let critChance = (state.upgrades['upg_luck'] || 0) * UPGRADES.upg_luck.effectPerLevel + (axe.critBonus || 0);
+        critChance += skillBonuses.critChancePct || 0;
         this.axePowerLabel.textContent = `Base Dmg: ${Math.floor(baseDmg)} | Crit: ${Math.floor(critChance * 100)}%`;
         if (this.curScreenId === 'screen-achievements') {
             this.updateAPUI();
+        }
+        if (this.curScreenId === 'screen-skills') {
+            this.updateSkillSummary();
         }
         if (this.curScreenId === 'screen-daily') {
             this.updateDailyLogin();
@@ -419,6 +460,12 @@ export class UIManager {
         const apBonus = this.getApBonusLabel();
         if (apValue) apValue.textContent = this.formatNum(ap);
         if (apBonus) apBonus.textContent = `+${bonusPct.toFixed(1)}%`;
+    }
+
+    private updateSkillSummary() {
+        const label = this.getSkillEssenceLabel();
+        if (!label) return;
+        label.textContent = this.formatNum(skillSystem.getAvailableEssence());
     }
 
     private renderTree() {
@@ -666,6 +713,54 @@ export class UIManager {
         }
     }
 
+    private renderSkills() {
+        const list = this.getSkillsList();
+        if (!list) return;
+        list.innerHTML = '';
+
+        const branches = ['chopping', 'collection', 'automation', 'luck'] as const;
+        for (const branch of branches) {
+            const group = document.createElement('div');
+            group.className = 'skill-branch';
+
+            const header = document.createElement('div');
+            header.className = 'skill-branch-header';
+            header.textContent = branch.charAt(0).toUpperCase() + branch.slice(1);
+            group.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'skill-grid';
+
+            for (const skill of skillSystem.getByBranch(branch)) {
+                const isUnlocked = skillSystem.isUnlocked(skill.id);
+                const canUnlock = skillSystem.canUnlock(skill.id);
+                const node = document.createElement('button');
+                node.className = `skill-node ${isUnlocked ? 'unlocked' : ''}`;
+                node.disabled = !canUnlock;
+                node.innerHTML = `
+                    <span class="skill-name">${skill.name}</span>
+                    <span class="skill-desc">${skill.description}</span>
+                    <span class="skill-cost">${skill.cost} Essence</span>
+                `;
+
+                if (!isUnlocked && canUnlock) {
+                    node.addEventListener('click', () => {
+                        if (skillSystem.unlock(skill.id)) {
+                            this.updateHUD();
+                            this.renderSkills();
+                            this.updateSkillSummary();
+                        }
+                    });
+                }
+
+                grid.appendChild(node);
+            }
+
+            group.appendChild(grid);
+            list.appendChild(group);
+        }
+    }
+
     private renderWoodInventory() {
         const list = document.getElementById('wood-inventory-list')!;
         list.innerHTML = '';
@@ -801,6 +896,8 @@ export class UIManager {
             this.checkUnlocks();
             this.renderAchievements();
             this.updateAPUI();
+            this.renderSkills();
+            this.updateSkillSummary();
         }
     }
 

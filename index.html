@@ -95,6 +95,19 @@
         </div>
       </section>
 
+      <!-- Skills Screen -->
+      <section id="screen-skills" class="screen hidden">
+        <h2>Skill Tree</h2>
+        <div class="skill-summary">
+          <div class="skill-summary-item">
+            <span class="skill-summary-label">Growth Essence Available</span>
+            <span class="skill-summary-value" id="skill-essence">0</span>
+          </div>
+        </div>
+        <p class="skill-note">Spend Growth Essence to unlock permanent bonuses.</p>
+        <div id="skills-list" class="skill-tree-list scrollable-list"></div>
+      </section>
+
       <!-- Daily Screen -->
       <section id="screen-daily" class="screen hidden">
         <h2>Daily Rewards</h2>
@@ -118,6 +131,7 @@
       <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
       <button class="nav-button" data-target="screen-achievements">🏆<br>Achievements</button>
       <button class="nav-button" data-target="screen-daily">📅<br>Daily</button>
+      <button class="nav-button" data-target="screen-skills">🌳<br>Skills</button>
     </nav>
 
     <!-- Full Screen Overlays -->
@@ -142,6 +156,7 @@
         </div>
         <button id="btn-achievements-open">Achievements</button>
         <button id="btn-daily-open">Daily</button>
+        <button id="btn-skills-open">Skill Tree</button>
         <button id="btn-hard-reset" class="danger">Hard Reset</button>
         <button id="btn-close-settings">Close</button>
       </div>

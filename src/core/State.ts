@@ -40,6 +40,10 @@ export const createInitialState = (): PlayerState => ({
         unlocked: {},
         totalAP: 0,
     },
+    skills: {
+        unlocked: {},
+        totalSpent: 0,
+    },
     daily: {
         lastResetDay: new Date().toISOString().slice(0, 10),
         progress: {

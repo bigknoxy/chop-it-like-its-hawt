@@ -16,6 +16,7 @@ import { biomeSystem, BiomeEvents } from '../systems/BiomeSystem';
 import { BIOMES } from '../data/Biomes';
 
 export class UIManager {
+    private lastFocusedElement: HTMLElement | null = null;
     private treeSprite = document.getElementById('tree-sprite')!;
     private hpBarFill = document.getElementById('hp-bar-fill')!;
     private woodAmountLabel = document.querySelector('.wood-amount')!;
@@ -27,6 +28,12 @@ export class UIManager {
     private curScreenId = 'screen-chop';
     private timerInterval: number | null = null;
     private chestTimeout: number | null = null;
+    private readonly moreTargets = new Set([
+        'screen-achievements',
+        'screen-daily',
+        'screen-skills',
+        'screen-biomes'
+    ]);
     private getAchievementsList(): HTMLElement | null {
         return document.getElementById('achievements-list');
     }
@@ -81,6 +88,7 @@ export class UIManager {
         this.renderSkills();
         this.updateSkillSummary();
         this.renderBiomes();
+        this.closeMoreSheet();
     }
 
     public update(dt: number) {
@@ -96,7 +104,26 @@ export class UIManager {
         document.querySelectorAll('.nav-button').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const target = (e.currentTarget as HTMLElement).getAttribute('data-target')!;
+                if (target === 'screen-more') {
+                    this.toggleMoreSheet();
+                    return;
+                }
                 this.switchScreen(target);
+            });
+        });
+
+        document.querySelectorAll('[data-action="close-more"]').forEach(el => {
+            el.addEventListener('click', () => {
+                this.closeMoreSheet();
+            });
+        });
+
+        document.querySelectorAll('.more-sheet-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = (e.currentTarget as HTMLElement).getAttribute('data-target');
+                if (!target) return;
+                this.switchScreen(target);
+                this.closeMoreSheet();
             });
         });
 
@@ -205,31 +232,31 @@ export class UIManager {
 
         // Settings
         document.getElementById('btn-settings-open')!.addEventListener('click', () => {
-            document.getElementById('settings-overlay')!.classList.remove('hidden');
+            this.openOverlay('settings-overlay');
             this.updatePrestigeUI();
         });
 
         document.getElementById('btn-wood-inventory')!.addEventListener('click', () => {
             this.renderWoodInventory();
-            document.getElementById('wood-inventory-overlay')!.classList.remove('hidden');
+            this.openOverlay('wood-inventory-overlay');
         });
 
         document.getElementById('btn-close-wood-inventory')!.addEventListener('click', () => {
-            document.getElementById('wood-inventory-overlay')!.classList.add('hidden');
+            this.closeOverlay('wood-inventory-overlay');
         });
 
         document.getElementById('btn-close-settings')!.addEventListener('click', () => {
-            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.closeOverlay('settings-overlay');
         });
 
         document.getElementById('btn-about')!.addEventListener('click', () => {
-            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.closeOverlay('settings-overlay');
             document.getElementById('game-version')!.textContent = window.__GAME_VERSION__ || '1.0.0';
-            document.getElementById('about-overlay')!.classList.remove('hidden');
+            this.openOverlay('about-overlay');
         });
 
         document.getElementById('btn-close-about')!.addEventListener('click', () => {
-            document.getElementById('about-overlay')!.classList.add('hidden');
+            this.closeOverlay('about-overlay');
         });
 
         document.getElementById('btn-toggle-sfx')!.addEventListener('click', (e) => {
@@ -257,23 +284,23 @@ export class UIManager {
         });
 
         document.getElementById('btn-cancel-rebirth')!.addEventListener('click', () => {
-            document.getElementById('rebirth-confirm-overlay')!.classList.add('hidden');
+            this.closeOverlay('rebirth-confirm-overlay');
         });
 
         document.getElementById('btn-achievements-open')!.addEventListener('click', () => {
-            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.closeOverlay('settings-overlay');
             this.switchScreen('screen-achievements');
         });
 
         document.getElementById('btn-daily-open')!.addEventListener('click', () => {
-            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.closeOverlay('settings-overlay');
             this.switchScreen('screen-daily');
         });
 
         const skillsBtn = document.getElementById('btn-skills-open');
         if (skillsBtn) {
             skillsBtn.addEventListener('click', () => {
-                document.getElementById('settings-overlay')!.classList.add('hidden');
+                this.closeOverlay('settings-overlay');
                 this.switchScreen('screen-skills');
             });
         }
@@ -281,7 +308,7 @@ export class UIManager {
         const biomesBtn = document.getElementById('btn-biomes-open');
         if (biomesBtn) {
             biomesBtn.addEventListener('click', () => {
-                document.getElementById('settings-overlay')!.classList.add('hidden');
+                this.closeOverlay('settings-overlay');
                 this.switchScreen('screen-biomes');
             });
         }
@@ -379,9 +406,14 @@ export class UIManager {
         }
 
         document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`[data-target="${id}"]`)?.classList.add('active');
+        if (this.moreTargets.has(id)) {
+            document.getElementById('nav-btn-more')?.classList.add('active');
+        } else {
+            document.querySelector(`[data-target="${id}"]`)?.classList.add('active');
+        }
 
         this.curScreenId = id;
+        this.closeMoreSheet();
         if (id === 'screen-upgrades') this.renderUpgrades();
         if (id === 'screen-axes') this.renderAxes();
         if (id === 'screen-forest') this.updateForestUI();
@@ -974,14 +1006,14 @@ export class UIManager {
         document.getElementById('rebirth-new-bonus')!.textContent =
             `+${Math.floor((newMultiplier - 1) * 100)}%`;
 
-        document.getElementById('rebirth-confirm-overlay')!.classList.remove('hidden');
+        this.openOverlay('rebirth-confirm-overlay');
     }
 
     private handleRebirth(): void {
         const essenceGain = prestigeSystem.getPreviewEssence();
         if (prestigeSystem.performRebirth()) {
-            document.getElementById('rebirth-confirm-overlay')!.classList.add('hidden');
-            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.closeOverlay('rebirth-confirm-overlay');
+            this.closeOverlay('settings-overlay');
             alert(`Forest Reborn! Gained ${this.formatNum(essenceGain)} Growth Essence.`);
             this.updateHUD();
             this.renderTree();
@@ -1023,6 +1055,58 @@ export class UIManager {
         if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
         if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
         return Math.floor(n).toString();
+    }
+
+    private toggleMoreSheet() {
+        const sheet = document.getElementById('more-sheet');
+        if (!sheet) return;
+        if (sheet.classList.contains('hidden')) {
+            this.openMoreSheet();
+            return;
+        }
+        this.closeMoreSheet();
+    }
+
+    private openMoreSheet() {
+        this.openOverlay('more-sheet');
+        document.getElementById('nav-btn-more')?.classList.add('active');
+    }
+
+    private closeMoreSheet() {
+        this.closeOverlay('more-sheet');
+        if (!this.moreTargets.has(this.curScreenId)) {
+            document.getElementById('nav-btn-more')?.classList.remove('active');
+        }
+    }
+
+    private openOverlay(id: string) {
+        const overlay = document.getElementById(id);
+        if (!overlay) return;
+        this.lastFocusedElement = document.activeElement as HTMLElement | null;
+        overlay.classList.remove('hidden');
+        const focusTarget = this.findFirstFocusable(overlay) || overlay;
+        focusTarget.focus();
+    }
+
+    private closeOverlay(id: string) {
+        const overlay = document.getElementById(id);
+        if (!overlay) return;
+        overlay.classList.add('hidden');
+        if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+            this.lastFocusedElement = null;
+        }
+    }
+
+    private findFirstFocusable(container: HTMLElement): HTMLElement | null {
+        const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const focusable = Array.from(container.querySelectorAll<HTMLElement>(selector));
+        for (const el of focusable) {
+            if (!el.hasAttribute('disabled')) {
+                return el;
+            }
+        }
+        return null;
     }
 }
 

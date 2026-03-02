@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chop it like it's HAWT</title>
   <link rel="icon"
     href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🪓</text></svg>' />
@@ -19,14 +19,14 @@
           <span class="wood-icon">🪵</span>
           <span class="wood-amount">0</span>
         </div>
-        <button id="btn-wood-inventory" class="wood-inventory-btn" title="Wood Inventory">📦</button>
+        <button id="btn-wood-inventory" class="wood-inventory-btn" title="Wood Inventory" aria-label="Wood inventory">📦</button>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="axe-stats">
           <span id="ui-equipped-axe">Rusty Axe</span>
           <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
         </div>
-        <button id="btn-settings-open" title="Settings">⚙️</button>
+        <button id="btn-settings-open" title="Settings" aria-label="Open settings">⚙️</button>
       </div>
     </header>
 
@@ -138,19 +138,58 @@
 
     <!-- Bottom Navigation -->
     <nav id="bottom-nav">
-      <button class="nav-button active" data-target="screen-chop">🪓<br>Chop</button>
-      <button class="nav-button" data-target="screen-upgrades">💪<br>Upgrades</button>
-      <button class="nav-button" data-target="screen-axes">🗡️<br>Axes</button>
-      <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
-      <button class="nav-button" data-target="screen-achievements">🏆<br>Achievements</button>
-      <button class="nav-button" data-target="screen-daily">📅<br>Daily</button>
-      <button class="nav-button" data-target="screen-skills">🌳<br>Skills</button>
+      <button class="nav-button active" data-target="screen-chop">
+        <span class="nav-icon">🪓</span>
+        <span class="nav-label">Chop</span>
+      </button>
+      <button class="nav-button" data-target="screen-upgrades">
+        <span class="nav-icon">💪</span>
+        <span class="nav-label">Upgr</span>
+      </button>
+      <button class="nav-button" data-target="screen-axes">
+        <span class="nav-icon">🗡️</span>
+        <span class="nav-label">Axes</span>
+      </button>
+      <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">
+        <span class="nav-icon">🌲</span>
+        <span class="nav-label">Forest</span>
+      </button>
+      <button class="nav-button" id="nav-btn-more" data-target="screen-more">
+        <span class="nav-icon">⋯</span>
+        <span class="nav-label">More</span>
+      </button>
     </nav>
 
+    <div id="more-sheet" class="sheet-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="more-sheet-title">
+      <div class="sheet-scrim" data-action="close-more"></div>
+      <div class="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <h3 id="more-sheet-title" class="bottom-sheet-title">More</h3>
+        <div class="bottom-sheet-grid">
+          <button class="more-sheet-item" data-target="screen-achievements">
+            <span class="more-item-icon">🏆</span>
+            <span class="more-item-label">Achievements</span>
+          </button>
+          <button class="more-sheet-item" data-target="screen-daily">
+            <span class="more-item-icon">📅</span>
+            <span class="more-item-label">Daily</span>
+          </button>
+          <button class="more-sheet-item" data-target="screen-skills">
+            <span class="more-item-icon">🌳</span>
+            <span class="more-item-label">Skills</span>
+          </button>
+          <button class="more-sheet-item" data-target="screen-biomes">
+            <span class="more-item-icon">🧭</span>
+            <span class="more-item-label">Biomes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Full Screen Overlays -->
-    <div id="settings-overlay" class="overlay hidden">
+    <div id="settings-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="modal">
-        <h2>Settings</h2>
+        <h2 id="settings-title">Settings</h2>
         <button id="btn-toggle-sfx">Sound: ON</button>
         <button id="btn-toggle-haptics">Haptics: ON</button>
         <button id="btn-about">About</button>
@@ -175,9 +214,9 @@
         <button id="btn-close-settings">Close</button>
       </div>
     </div>
-    <div id="rebirth-confirm-overlay" class="overlay hidden">
+    <div id="rebirth-confirm-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rebirth-confirm-title">
       <div class="modal">
-        <h2>🌲 Forest Rebirth</h2>
+        <h2 id="rebirth-confirm-title">🌲 Forest Rebirth</h2>
         <p>You will gain <span id="rebirth-essence-gain">0</span> Growth Essence.</p>
         <p>Your production multiplier will increase to <span id="rebirth-new-bonus">+0%</span>.</p>
         <div class="warning-box">
@@ -201,17 +240,17 @@
         </div>
       </div>
     </div>
-    <div id="about-overlay" class="overlay hidden">
+    <div id="about-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
       <div class="modal">
-        <h2>About</h2>
+        <h2 id="about-title">About</h2>
         <p>Chop it like it's HAWT</p>
         <p>Version: <span id="game-version">1.0.0</span></p>
         <button id="btn-close-about">Close</button>
       </div>
     </div>
-    <div id="wood-inventory-overlay" class="overlay hidden">
+    <div id="wood-inventory-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wood-inventory-title">
       <div class="modal wood-inventory-modal">
-        <h2>📦 Wood Inventory</h2>
+        <h2 id="wood-inventory-title">📦 Wood Inventory</h2>
         <div id="wood-inventory-list" class="wood-inventory-list">
         </div>
         <button id="btn-close-wood-inventory">Close</button>

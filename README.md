@@ -71,6 +71,7 @@ src/
 - 📅 Daily quests and login rewards (7-day loop)
 - 💎 Crystal Caverns biome and rare woods
 - 🌋 Volcanic Grove biome and blazing woods
+- 🗺️ Biome selection UI
 - 📦 Wood inventory UI
 - ✨ Tree special mechanics (timed rush, multi-phase, bonus chests)
 - 💾 Auto-save functionality

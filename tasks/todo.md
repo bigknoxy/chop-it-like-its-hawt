@@ -2,30 +2,29 @@
 - [x] Locate existing implementation / patterns
 - [x] Design: minimal approach + key decisions
 - [x] Implement smallest safe slice
-- [x] Add/adjust tests (not expected)
+- [x] Add/adjust tests (if needed)
 - [x] Run verification (build + Playwright checks)
 - [x] Summarize changes + verification story
 - [x] Record lessons (if any)
 
 ## Working Notes
-- Repo: /home/josh/projects/chopIt/chop-it-v1-1-clean
-- Requirement: Volcanic Grove biome (volcanic_grove) with ember_oak, magma_willow, phoenix_pine and woods ember_ash, magma_core, phoenix_feather
-- Unlock: 1000 total wood OR 20 Growth Essence; ensure UI list shows it
-- Verification: build + Playwright forced biome to volcanic_grove (temporary tweak + revert)
+- Task: Add Biomes UI accessible from Settings; list BIOMES, allow unlock/switch using BiomeSystem.
+- Verify UI shows Crystal Caverns + Volcanic Grove.
 
 ## Acceptance Criteria
-- Biome data present for volcanic_grove
-- Trees and woods data present with correct ids
-- BiomeSystem supports unlock/change and allowed trees
-- Biome selection UI shows Volcanic Grove with correct unlock label
-- `npm run build` succeeds
-- Playwright verifies UI using forced volcanic_grove
-- Docs updated if needed
+- Biomes screen exists with list of all BIOMES
+- Current biome shown and switchable when unlocked
+- Locked biomes show requirements (wood or Growth Essence)
+- Unlock uses BiomeSystem.canUnlockBiome and BiomeSystem.unlockBiome
+- Settings button opens Biomes screen
+- npm run build succeeds
+- Playwright verifies Crystal Caverns + Volcanic Grove entries
 
 ## Results
-- Added Volcanic Grove feature note to README.
-- Verified biome selection UI shows Volcanic Grove and unlock label.
+- Added Biomes screen with current biome summary and unlock/switch list.
+- Wired Settings -> Biomes button and BiomeSystem events for refresh.
+- Styled biome cards and action buttons.
 
 ## Verification
 - `npm run build`
-- Playwright: opened Settings > Biomes, confirmed Volcanic Grove entry displays and marked Active (forced state during check).
+- Playwright: confirmed Biomes screen shows Crystal Caverns + Volcanic Grove in list.

@@ -551,6 +551,96 @@ body {
   margin-bottom: 12px;
 }
 
+/* Biomes */
+.biome-current-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #22252a;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.biome-current-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.biome-current-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--wood-color);
+}
+
+.biome-list {
+  gap: 12px;
+}
+
+.biome-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2f3238;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #202225;
+  gap: 12px;
+}
+
+.biome-item.unlocked {
+  border-color: rgba(159, 232, 139, 0.35);
+  box-shadow: 0 0 0 1px rgba(159, 232, 139, 0.1);
+}
+
+.biome-item.active {
+  border-color: rgba(209, 154, 102, 0.6);
+  box-shadow: 0 0 0 1px rgba(209, 154, 102, 0.2);
+}
+
+.biome-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.biome-name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.biome-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.biome-requirements {
+  font-size: 0.8rem;
+  color: var(--accent-color);
+}
+
+.biome-action-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 92px;
+}
+
+.biome-action-btn:disabled {
+  background-color: #4f545c;
+  color: #72767d;
+  cursor: not-allowed;
+}
+
 .skill-tree-list {
   gap: 16px;
 }

@@ -34,6 +34,10 @@ export class BiomeSystem {
         return false;
     }
 
+    public canUnlock(biomeId: BiomeId): boolean {
+        return this.canUnlockBiome(biomeId);
+    }
+
     public unlockBiome(biomeId: BiomeId): boolean {
         if (!this.canUnlockBiome(biomeId)) return false;
 

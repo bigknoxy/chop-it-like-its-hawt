@@ -12,6 +12,8 @@ import { prestigeSystem, PrestigeEvents } from '../systems/PrestigeSystem';
 import { achievementSystem, AchievementEvents } from '../systems/AchievementSystem';
 import { questSystem, QuestEvents } from '../systems/QuestSystem';
 import { skillSystem, SkillEvents } from '../systems/SkillSystem';
+import { biomeSystem, BiomeEvents } from '../systems/BiomeSystem';
+import { BIOMES } from '../data/Biomes';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -57,6 +59,10 @@ export class UIManager {
         return document.getElementById('skill-essence');
     }
 
+    private getBiomeList(): HTMLElement | null {
+        return document.getElementById('biomes-list');
+    }
+
     // Settings
     public hapticsEnabled = true;
     public soundEnabled = true;
@@ -74,6 +80,7 @@ export class UIManager {
         this.updateDailyLogin();
         this.renderSkills();
         this.updateSkillSummary();
+        this.renderBiomes();
     }
 
     public update(dt: number) {
@@ -271,6 +278,14 @@ export class UIManager {
             });
         }
 
+        const biomesBtn = document.getElementById('btn-biomes-open');
+        if (biomesBtn) {
+            biomesBtn.addEventListener('click', () => {
+                document.getElementById('settings-overlay')!.classList.add('hidden');
+                this.switchScreen('screen-biomes');
+            });
+        }
+
         const loginBtn = this.getDailyLoginButton();
         if (loginBtn) {
             loginBtn.addEventListener('click', () => {
@@ -336,6 +351,21 @@ export class UIManager {
             this.updateSkillSummary();
         };
 
+        BiomeEvents.onBiomeUnlock = () => {
+            if (this.curScreenId === 'screen-biomes') {
+                this.renderBiomes();
+            }
+            this.updateBiomeSummary();
+        };
+
+        BiomeEvents.onBiomeChange = () => {
+            if (this.curScreenId === 'screen-biomes') {
+                this.renderBiomes();
+            }
+            this.updateBiomeSummary();
+            this.renderTree();
+        };
+
     }
 
     private switchScreen(id: string) {
@@ -367,6 +397,9 @@ export class UIManager {
             this.renderSkills();
             this.updateSkillSummary();
         }
+        if (id === 'screen-biomes') {
+            this.renderBiomes();
+        }
     }
 
     private updateHUD() {
@@ -390,6 +423,16 @@ export class UIManager {
         if (this.curScreenId === 'screen-daily') {
             this.updateDailyLogin();
         }
+        if (this.curScreenId === 'screen-biomes') {
+            this.updateBiomeSummary();
+        }
+    }
+
+    private updateBiomeSummary() {
+        const label = document.getElementById('biome-current');
+        if (!label) return;
+        const biome = BIOMES[biomeSystem.getCurrentBiome()];
+        label.textContent = biome ? `${biome.emoji} ${biome.name}` : 'Unknown';
     }
 
     private renderDaily() {
@@ -761,6 +804,58 @@ export class UIManager {
         }
     }
 
+    private renderBiomes() {
+        const list = this.getBiomeList();
+        if (!list) return;
+        list.innerHTML = '';
+
+        this.updateBiomeSummary();
+
+        const currentBiomeId = biomeSystem.getCurrentBiome();
+
+        for (const biome of Object.values(BIOMES)) {
+            const isUnlocked = biomeSystem.isBiomeUnlocked(biome.id);
+            const isActive = currentBiomeId === biome.id;
+            const canUnlock = biomeSystem.canUnlock(biome.id);
+
+            const el = document.createElement('div');
+            el.className = `biome-item ${isUnlocked ? 'unlocked' : 'locked'} ${isActive ? 'active' : ''}`;
+
+            const requirementText = this.getBiomeRequirementText(biome);
+
+            el.innerHTML = `
+                <div class="biome-info">
+                    <span class="biome-name">${biome.emoji} ${biome.name}</span>
+                    <span class="biome-desc">${biome.description}</span>
+                    ${isUnlocked ? '' : `<span class="biome-requirements">Requires: ${requirementText}</span>`}
+                </div>
+                <button class="biome-action-btn" ${isActive ? 'disabled' : (isUnlocked ? '' : (!canUnlock ? 'disabled' : ''))}>
+                    ${isActive ? 'ACTIVE' : (isUnlocked ? 'SWITCH' : 'UNLOCK')}
+                </button>
+            `;
+
+            const actionBtn = el.querySelector('button');
+            if (actionBtn) {
+                actionBtn.addEventListener('click', () => {
+                    if (isUnlocked) {
+                        if (!isActive && biomeSystem.changeBiome(biome.id)) {
+                            this.renderBiomes();
+                        }
+                        return;
+                    }
+
+                    if (biomeSystem.unlockBiome(biome.id)) {
+                        biomeSystem.changeBiome(biome.id);
+                        this.renderBiomes();
+                        this.updateHUD();
+                    }
+                });
+            }
+
+            list.appendChild(el);
+        }
+    }
+
     private renderWoodInventory() {
         const list = document.getElementById('wood-inventory-list')!;
         list.innerHTML = '';
@@ -908,6 +1003,20 @@ export class UIManager {
             case 'fastTick': return '50% faster';
             default: return '';
         }
+    }
+
+    private getBiomeRequirementText(biome: typeof BIOMES[string]): string {
+        const { wood, growthEssence } = biome.unlockCost;
+        if (wood && growthEssence) {
+            return `${this.formatNum(wood.amount)} Wood or ${this.formatNum(growthEssence)} Growth Essence`;
+        }
+        if (wood) {
+            return `${this.formatNum(wood.amount)} Wood`;
+        }
+        if (growthEssence) {
+            return `${this.formatNum(growthEssence)} Growth Essence`;
+        }
+        return 'Unknown requirements';
     }
 
     private formatNum(n: number) {

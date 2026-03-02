@@ -19,5 +19,16 @@ export const BIOMES: Record<string, BiomeDefinition> = {
         },
         allowedTrees: ['crystal_oak', 'gem_willow', 'diamond_pine'],
         emoji: '💎'
+    },
+    volcanic_grove: {
+        id: 'volcanic_grove',
+        name: 'Volcanic Grove',
+        description: 'Smoldering groves where embers cling to every branch.',
+        unlockCost: {
+            wood: { amount: 1000 },
+            growthEssence: 20
+        },
+        allowedTrees: ['ember_oak', 'magma_willow', 'phoenix_pine'],
+        emoji: '🌲'
     }
 };

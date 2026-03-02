@@ -90,6 +90,36 @@ export const TREES: Record<string, TreeDefinition> = {
         spawnWeight: 10,
         biome: 'crystal_caverns',
         emoji: '🔷'
+    },
+    ember_oak: {
+        id: 'ember_oak',
+        name: 'Ember Oak',
+        maxHP: 1400,
+        baseWoodYield: 12,
+        woodTypeId: 'ember_ash',
+        spawnWeight: 45,
+        biome: 'volcanic_grove',
+        emoji: '🌲'
+    },
+    magma_willow: {
+        id: 'magma_willow',
+        name: 'Magma Willow',
+        maxHP: 2400,
+        baseWoodYield: 9,
+        woodTypeId: 'magma_core',
+        spawnWeight: 25,
+        biome: 'volcanic_grove',
+        emoji: '🌳'
+    },
+    phoenix_pine: {
+        id: 'phoenix_pine',
+        name: 'Phoenix Pine',
+        maxHP: 4200,
+        baseWoodYield: 7,
+        woodTypeId: 'phoenix_feather',
+        spawnWeight: 10,
+        biome: 'volcanic_grove',
+        emoji: '🌲'
     }
 };
 

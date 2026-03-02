@@ -42,5 +42,23 @@ export const WOODS: Record<string, WoodType> = {
         name: 'Diamond Dust',
         valueMultiplier: 10,
         rarity: 'legendary',
+    },
+    ember_ash: {
+        id: 'ember_ash',
+        name: 'Ember Ash',
+        valueMultiplier: 4,
+        rarity: 'rare',
+    },
+    magma_core: {
+        id: 'magma_core',
+        name: 'Magma Core',
+        valueMultiplier: 12,
+        rarity: 'epic',
+    },
+    phoenix_feather: {
+        id: 'phoenix_feather',
+        name: 'Phoenix Feather',
+        valueMultiplier: 20,
+        rarity: 'legendary',
     }
 };

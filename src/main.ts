@@ -5,6 +5,7 @@ import { chopSystem } from './systems/ChopSystem';
 import { upgradeSystem } from './systems/UpgradeSystem';
 import { forestSystem } from './systems/ForestSystem';
 import { achievementSystem } from './systems/AchievementSystem';
+import { questSystem } from './systems/QuestSystem';
 
 import packageJson from '../package.json?raw';
 
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load save before UI initialization
   saveSystem.load();
   achievementSystem.syncFromState();
+  questSystem.syncFromState();
 
   // Initialize UI
   uiManager.init();
@@ -30,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register Systems to Game Loop
   Game.registerUpdate((dt) => chopSystem.update(dt));
   Game.registerUpdate((dt) => forestSystem.update());
+  Game.registerUpdate((dt) => questSystem.update());
   Game.registerUpdate((dt) => saveSystem.update(dt));
 
   // Start the loop

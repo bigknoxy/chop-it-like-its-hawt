@@ -2,6 +2,7 @@ import { state } from '../core/State';
 import { UPGRADES } from '../data/Upgrades';
 import { prestigeSystem } from './PrestigeSystem';
 import { achievementSystem } from './AchievementSystem';
+import { questSystem } from './QuestSystem';
 
 export const ForestEvents = {
     onWoodGenerated: (amount: number) => { },
@@ -40,6 +41,7 @@ export class ForestSystem {
 
             prestigeSystem.addLifetimeWood(gained);
             achievementSystem.addProgress('woodCollected', gained);
+            questSystem.addProgress('woodCollected', gained);
 
             ForestEvents.onWoodGenerated(gained);
         }
@@ -67,6 +69,7 @@ export class ForestSystem {
 
             prestigeSystem.addLifetimeWood(gained);
             achievementSystem.addProgress('woodCollected', gained);
+            questSystem.addProgress('woodCollected', gained);
 
             return gained;
         }

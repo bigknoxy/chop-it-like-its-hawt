@@ -10,6 +10,7 @@ import { forestSystem, ForestEvents } from '../systems/ForestSystem';
 import { saveSystem, SaveEvents } from '../systems/SaveSystem';
 import { prestigeSystem, PrestigeEvents } from '../systems/PrestigeSystem';
 import { achievementSystem, AchievementEvents } from '../systems/AchievementSystem';
+import { questSystem, QuestEvents } from '../systems/QuestSystem';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -35,6 +36,18 @@ export class UIManager {
         return document.getElementById('ap-bonus');
     }
 
+    private getDailyQuestList(): HTMLElement | null {
+        return document.getElementById('daily-quests-list');
+    }
+
+    private getDailyLoginDesc(): HTMLElement | null {
+        return document.getElementById('daily-login-desc');
+    }
+
+    private getDailyLoginButton(): HTMLButtonElement | null {
+        return document.getElementById('daily-login-claim') as HTMLButtonElement | null;
+    }
+
     // Settings
     public hapticsEnabled = true;
     public soundEnabled = true;
@@ -48,6 +61,8 @@ export class UIManager {
         this.updateForestUI();
         this.renderAchievements();
         this.updateAPUI();
+        this.renderDaily();
+        this.updateDailyLogin();
     }
 
     public update(dt: number) {
@@ -226,6 +241,21 @@ export class UIManager {
             this.switchScreen('screen-achievements');
         });
 
+        document.getElementById('btn-daily-open')!.addEventListener('click', () => {
+            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.switchScreen('screen-daily');
+        });
+
+        const loginBtn = this.getDailyLoginButton();
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                if (questSystem.claimLoginReward()) {
+                    this.updateHUD();
+                    this.updateDailyLogin();
+                }
+            });
+        }
+
 
         PrestigeEvents.onRebirth = (gained, total) => {
             this.updatePrestigeUI();
@@ -238,6 +268,41 @@ export class UIManager {
 
         AchievementEvents.onAPUpdated = () => {
             this.updateAPUI();
+        };
+
+        QuestEvents.onQuestProgress = () => {
+            if (this.curScreenId === 'screen-daily') {
+                this.renderDaily();
+            }
+        };
+
+        QuestEvents.onQuestCompleted = () => {
+            if (this.curScreenId === 'screen-daily') {
+                this.renderDaily();
+            }
+        };
+
+        QuestEvents.onQuestClaimed = () => {
+            this.updateHUD();
+            if (this.curScreenId === 'screen-daily') {
+                this.renderDaily();
+            }
+        };
+
+        QuestEvents.onLoginRewardReady = () => {
+            this.updateDailyLogin();
+        };
+
+        QuestEvents.onLoginRewardClaimed = () => {
+            this.updateHUD();
+            this.updateDailyLogin();
+        };
+
+        QuestEvents.onDailyReset = () => {
+            if (this.curScreenId === 'screen-daily') {
+                this.renderDaily();
+            }
+            this.updateDailyLogin();
         };
 
     }
@@ -263,6 +328,10 @@ export class UIManager {
             this.renderAchievements();
             this.updateAPUI();
         }
+        if (id === 'screen-daily') {
+            this.renderDaily();
+            this.updateDailyLogin();
+        }
     }
 
     private updateHUD() {
@@ -277,6 +346,70 @@ export class UIManager {
         if (this.curScreenId === 'screen-achievements') {
             this.updateAPUI();
         }
+        if (this.curScreenId === 'screen-daily') {
+            this.updateDailyLogin();
+        }
+    }
+
+    private renderDaily() {
+        const list = this.getDailyQuestList();
+        if (!list) return;
+        list.innerHTML = '';
+
+        const defs = questSystem.getDailyQuests();
+        for (const def of defs) {
+            const progress = questSystem.getQuestProgress(def.id);
+            const isComplete = questSystem.isQuestComplete(def.id);
+            const isClaimed = questSystem.isQuestClaimed(def.id);
+            const clamped = Math.min(progress, def.target);
+            const pct = Math.max(0, Math.min(100, (clamped / def.target) * 100));
+
+            const el = document.createElement('div');
+            const itemState = isClaimed ? 'complete' : isComplete ? 'complete' : '';
+            el.className = `daily-quest-item ${itemState}`;
+
+            const rewardText = `${this.formatNum(def.reward.wood)} Wood + ${this.formatNum(def.reward.growthEssence)} Growth Essence`;
+            el.innerHTML = `
+                <div class="daily-quest-info">
+                    <span class="daily-quest-title">${def.title}</span>
+                    <span class="daily-quest-desc">${def.description}</span>
+                    <div class="daily-quest-progress">
+                        <div class="daily-quest-progress-fill" style="width: ${pct}%"></div>
+                    </div>
+                    <span class="daily-quest-progress-text">${this.formatNum(clamped)} / ${this.formatNum(def.target)}</span>
+                </div>
+                <div class="daily-quest-reward">
+                    <span>${rewardText}</span>
+                    <button class="daily-claim-btn" ${!isComplete || isClaimed ? 'disabled' : ''}>${isClaimed ? 'Claimed' : 'Claim'}</button>
+                </div>
+            `;
+
+            const claimBtn = el.querySelector('button');
+            if (claimBtn && isComplete && !isClaimed) {
+                claimBtn.addEventListener('click', () => {
+                    if (questSystem.claimQuest(def.id)) {
+                        this.updateHUD();
+                        this.renderDaily();
+                    }
+                });
+            }
+
+            list.appendChild(el);
+        }
+    }
+
+    private updateDailyLogin() {
+        const desc = this.getDailyLoginDesc();
+        const btn = this.getDailyLoginButton();
+        if (!desc || !btn) return;
+
+        const reward = questSystem.getLoginReward();
+        const day = questSystem.getLoginRewardDayIndex() + 1;
+        desc.textContent = `Day ${day}: ${this.formatNum(reward.wood)} Wood + ${this.formatNum(reward.growthEssence)} Growth Essence`;
+
+        const canClaim = questSystem.canClaimLoginReward();
+        btn.disabled = !canClaim;
+        btn.textContent = canClaim ? 'Claim' : 'Claimed';
     }
 
     private updateAPUI() {

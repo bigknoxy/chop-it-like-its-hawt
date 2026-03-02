@@ -14,7 +14,7 @@ An incremental clicker game where you chop trees, collect wood, upgrade your axe
 - **Upgrade your axe** - Improve your chopping power with new axes
 - **Unlock upgrades** - Boost strength, crit chance, auto-chop, and more
 - **Build your forest** - Earn idle wood while you're away
-- **Complete daily quests** - Claim daily rewards for chopping and upgrading
+- **Complete daily quests** - Claim rewards for chopping, collecting wood value, and upgrades
 
 ## 🚀 Quick Start
 
@@ -68,7 +68,7 @@ src/
 - 🌲 Forest rebirth prestige bonuses
 - 🏆 Achievement system with permanent AP bonuses
 - 🌳 Growth Essence skill tree bonuses
-- 📅 Daily quests and login rewards
+- 📅 Daily quests and login rewards (7-day loop)
 - 💎 Crystal Caverns biome and rare woods
 - 🌋 Volcanic Grove biome and blazing woods
 - 📦 Wood inventory UI

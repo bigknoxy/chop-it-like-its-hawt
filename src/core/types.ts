@@ -95,6 +95,8 @@ export interface BiomeState {
 export type AchievementId = string;
 export type AchievementMetric = 'treesChopped' | 'woodCollected' | 'rebirths' | 'biomesUnlocked';
 
+export type DailyQuestMetric = 'treesChopped' | 'woodCollected' | 'upgradesPurchased';
+
 export interface AchievementDefinition {
   id: AchievementId;
   name: string;
@@ -110,6 +112,33 @@ export interface AchievementState {
   totalAP: number;
 }
 
+export interface DailyQuestReward {
+  wood: number;
+  growthEssence: number;
+}
+
+export interface DailyQuestDefinition {
+  id: string;
+  title: string;
+  description: string;
+  metric: DailyQuestMetric;
+  target: number;
+  reward: DailyQuestReward;
+}
+
+export interface DailyLoginState {
+  dayIndex: number;
+  claimedToday: boolean;
+  lastClaimDay: string;
+}
+
+export interface DailyState {
+  lastResetDay: string;
+  progress: Record<DailyQuestMetric, number>;
+  claimed: Record<string, boolean>;
+  login: DailyLoginState;
+}
+
 export interface PlayerState {
   totalWood: number;
   woodByType: Record<WoodTypeId, number>;
@@ -120,5 +149,6 @@ export interface PlayerState {
   prestige: PrestigeState;
   biome: BiomeState;
   achievements: AchievementState;
+  daily: DailyState;
   lastSaveTimestamp: number;
 }

@@ -6,6 +6,7 @@ import { WOODS } from '../data/Woods';
 import { prestigeSystem } from './PrestigeSystem';
 import { biomeSystem } from './BiomeSystem';
 import { achievementSystem } from './AchievementSystem';
+import { questSystem } from './QuestSystem';
 
 export type SpecialMechanicResult = {
     type: 'chest' | 'timed' | 'multiPhase' | null;
@@ -145,6 +146,7 @@ export class ChopSystem {
         const totalAdded = bonusReward * woodDef.valueMultiplier;
         state.totalWood += totalAdded;
         achievementSystem.addProgress('woodCollected', totalAdded);
+        questSystem.addProgress('woodCollected', totalAdded);
         ChopEvents.onWoodUpdate();
     }
 
@@ -200,9 +202,11 @@ export class ChopSystem {
         const totalAdded = woodGain * woodDef.valueMultiplier;
         state.totalWood += totalAdded;
         achievementSystem.addProgress('woodCollected', totalAdded);
+        questSystem.addProgress('woodCollected', totalAdded);
 
         prestigeSystem.addLifetimeWood(totalAdded);
         achievementSystem.addProgress('treesChopped', 1);
+        questSystem.addProgress('treesChopped', 1);
 
         ChopEvents.onTreeFall(woodGain, def.woodTypeId, specialResult);
         ChopEvents.onWoodUpdate();

@@ -514,6 +514,122 @@ body {
   color: #9fe88b;
 }
 
+/* Daily Quests */
+.daily-login-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #24272d;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.daily-login-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-login-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.daily-login-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-list {
+  gap: 12px;
+}
+
+.daily-quest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2f3238;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #202225;
+  gap: 12px;
+}
+
+.daily-quest-item.complete {
+  border-color: rgba(114, 137, 218, 0.5);
+  box-shadow: 0 0 0 1px rgba(114, 137, 218, 0.15);
+}
+
+.daily-quest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.daily-quest-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.daily-quest-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-progress {
+  height: 6px;
+  background: #1a1c20;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.daily-quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ea1ff, #69d18f);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.daily-quest-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 140px;
+  text-align: right;
+}
+
+.daily-quest-reward span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.daily-claim-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.daily-claim-btn:disabled {
+  background-color: #4f545c;
+  color: #72767d;
+  cursor: not-allowed;
+}
+
 /* Upgrade Item */
 .upgrade-item {
   display: flex;

@@ -137,9 +137,9 @@ Based on market research of incremental games in 2024-2025, including analysis o
 ## Priority 8: Daily Quests/Rewards
 
 ### Design
-- 3 daily quests (chop X trees, collect Y wood, prestige Z times)
-- Daily login reward calendar
-- Weekly challenges
+- 3 daily quests (chop trees, collect wood value, purchase upgrades)
+- Daily login reward calendar (7-day loop)
+- Rewards grant wood + Growth Essence
 
 ### Implementation Files
 - `src/data/DailyQuests.ts` - Quest definitions

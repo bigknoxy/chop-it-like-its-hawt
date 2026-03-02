@@ -40,6 +40,20 @@ export const createInitialState = (): PlayerState => ({
         unlocked: {},
         totalAP: 0,
     },
+    daily: {
+        lastResetDay: new Date().toISOString().slice(0, 10),
+        progress: {
+            treesChopped: 0,
+            woodCollected: 0,
+            upgradesPurchased: 0,
+        },
+        claimed: {},
+        login: {
+            dayIndex: 0,
+            claimedToday: false,
+            lastClaimDay: '',
+        },
+    },
     lastSaveTimestamp: Date.now(),
 });
 

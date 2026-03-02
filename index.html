@@ -76,6 +76,24 @@
           </div>
         </div>
       </section>
+
+      <!-- Achievements Screen -->
+      <section id="screen-achievements" class="screen hidden">
+        <h2>Achievements</h2>
+        <div class="achievement-summary">
+          <div class="achievement-summary-item">
+            <span class="achievement-summary-label">Achievement Points</span>
+            <span class="achievement-summary-value" id="ap-total">0</span>
+          </div>
+          <div class="achievement-summary-item">
+            <span class="achievement-summary-label">AP Bonus</span>
+            <span class="achievement-summary-value" id="ap-bonus">+0.0%</span>
+          </div>
+        </div>
+        <p class="achievement-note">AP grants +0.5% wood gain per point.</p>
+        <div id="achievements-list" class="achievement-list scrollable-list">
+        </div>
+      </section>
     </main>
 
     <!-- Bottom Navigation -->
@@ -84,6 +102,7 @@
       <button class="nav-button" data-target="screen-upgrades">💪<br>Upgrades</button>
       <button class="nav-button" data-target="screen-axes">🗡️<br>Axes</button>
       <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
+      <button class="nav-button" data-target="screen-achievements">🏆<br>Achievements</button>
     </nav>
 
     <!-- Full Screen Overlays -->
@@ -106,6 +125,7 @@
             <button id="btn-rebirth" class="danger">Rebirth Forest</button>
           </div>
         </div>
+        <button id="btn-achievements-open">Achievements</button>
         <button id="btn-hard-reset" class="danger">Hard Reset</button>
         <button id="btn-close-settings">Close</button>
       </div>

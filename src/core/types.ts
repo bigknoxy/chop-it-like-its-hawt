@@ -92,6 +92,24 @@ export interface BiomeState {
   unlockedBiomes: BiomeId[];
 }
 
+export type AchievementId = string;
+export type AchievementMetric = 'treesChopped' | 'woodCollected' | 'rebirths' | 'biomesUnlocked';
+
+export interface AchievementDefinition {
+  id: AchievementId;
+  name: string;
+  description: string;
+  metric: AchievementMetric;
+  target: number;
+  apReward: number;
+}
+
+export interface AchievementState {
+  progress: Record<AchievementMetric, number>;
+  unlocked: Record<AchievementId, boolean>;
+  totalAP: number;
+}
+
 export interface PlayerState {
   totalWood: number;
   woodByType: Record<WoodTypeId, number>;
@@ -101,5 +119,6 @@ export interface PlayerState {
   forest: ForestState;
   prestige: PrestigeState;
   biome: BiomeState;
+  achievements: AchievementState;
   lastSaveTimestamp: number;
 }

@@ -65,6 +65,7 @@ src/
 - 💪 Upgrade system with progression
 - 🌙 Idle forest income
 - 🌲 Forest rebirth prestige bonuses
+- 🏆 Achievement system with permanent AP bonuses
 - 💎 Crystal Caverns biome and rare woods
 - 📦 Wood inventory UI
 - ✨ Tree special mechanics (timed rush, multi-phase, bonus chests)

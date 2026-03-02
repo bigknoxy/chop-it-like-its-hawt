@@ -1,5 +1,6 @@
 import { state, loadState, createInitialState, setCurrentTree } from '../core/State';
 import { TREES } from '../data/Trees';
+import { achievementSystem } from './AchievementSystem';
 
 export const PrestigeEvents = {
     onRebirth: (essenceGained: number, newTotal: number) => { },
@@ -34,11 +35,13 @@ export class PrestigeSystem {
         state.prestige.growthEssence += essenceGained;
         state.prestige.totalRebirths++;
         state.prestige.lastRebirthTimestamp = Date.now();
+        achievementSystem.addProgress('rebirths', 1);
 
         const preservedEssence = state.prestige.growthEssence;
         const preservedRebirths = state.prestige.totalRebirths;
         const preservedTimestamp = state.prestige.lastRebirthTimestamp;
         const preservedAxes = [...state.ownedAxes];
+        const preservedAchievements = { ...state.achievements };
         const preservedForestUnlocked = state.forest.isUnlocked;
 
         const freshState = createInitialState();
@@ -49,6 +52,7 @@ export class PrestigeSystem {
         state.prestige.lastRebirthTimestamp = preservedTimestamp;
         state.ownedAxes = preservedAxes;
         state.forest.isUnlocked = preservedForestUnlocked;
+        state.achievements = preservedAchievements;
 
         setCurrentTree({
             defId: 'tree_basic',

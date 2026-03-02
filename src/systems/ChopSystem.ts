@@ -5,6 +5,7 @@ import { UPGRADES } from '../data/Upgrades';
 import { WOODS } from '../data/Woods';
 import { prestigeSystem } from './PrestigeSystem';
 import { biomeSystem } from './BiomeSystem';
+import { achievementSystem } from './AchievementSystem';
 
 export type SpecialMechanicResult = {
     type: 'chest' | 'timed' | 'multiPhase' | null;
@@ -138,9 +139,12 @@ export class ChopSystem {
 
     private givePhaseReward(def: typeof TREES[string], phase: number) {
         const phaseReward = Math.ceil(def.baseWoodYield * 0.3);
-        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + phaseReward;
+        const bonusReward = Math.ceil(achievementSystem.applyWoodBonus(phaseReward));
+        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + bonusReward;
         const woodDef = WOODS[def.woodTypeId];
-        state.totalWood += phaseReward * woodDef.valueMultiplier;
+        const totalAdded = bonusReward * woodDef.valueMultiplier;
+        state.totalWood += totalAdded;
+        achievementSystem.addProgress('woodCollected', totalAdded);
         ChopEvents.onWoodUpdate();
     }
 
@@ -188,14 +192,17 @@ export class ChopSystem {
         }
 
         woodGain = Math.ceil(woodGain);
+        woodGain = Math.ceil(achievementSystem.applyWoodBonus(woodGain));
 
         state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
 
         const woodDef = WOODS[def.woodTypeId];
         const totalAdded = woodGain * woodDef.valueMultiplier;
         state.totalWood += totalAdded;
+        achievementSystem.addProgress('woodCollected', totalAdded);
 
         prestigeSystem.addLifetimeWood(totalAdded);
+        achievementSystem.addProgress('treesChopped', 1);
 
         ChopEvents.onTreeFall(woodGain, def.woodTypeId, specialResult);
         ChopEvents.onWoodUpdate();

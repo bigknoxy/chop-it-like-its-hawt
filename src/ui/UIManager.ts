@@ -9,6 +9,7 @@ import { axeSystem, AxeEvents } from '../systems/AxeSystem';
 import { forestSystem, ForestEvents } from '../systems/ForestSystem';
 import { saveSystem, SaveEvents } from '../systems/SaveSystem';
 import { prestigeSystem, PrestigeEvents } from '../systems/PrestigeSystem';
+import { achievementSystem, AchievementEvents } from '../systems/AchievementSystem';
 
 export class UIManager {
     private treeSprite = document.getElementById('tree-sprite')!;
@@ -22,6 +23,17 @@ export class UIManager {
     private curScreenId = 'screen-chop';
     private timerInterval: number | null = null;
     private chestTimeout: number | null = null;
+    private getAchievementsList(): HTMLElement | null {
+        return document.getElementById('achievements-list');
+    }
+
+    private getApValueLabel(): HTMLElement | null {
+        return document.getElementById('ap-total');
+    }
+
+    private getApBonusLabel(): HTMLElement | null {
+        return document.getElementById('ap-bonus');
+    }
 
     // Settings
     public hapticsEnabled = true;
@@ -34,6 +46,8 @@ export class UIManager {
         this.renderUpgrades();
         this.renderAxes();
         this.updateForestUI();
+        this.renderAchievements();
+        this.updateAPUI();
     }
 
     public update(dt: number) {
@@ -107,6 +121,10 @@ export class UIManager {
             this.renderUpgrades();
             this.renderAxes();
             this.renderWoodInventory();
+            if (this.curScreenId === 'screen-achievements') {
+                this.renderAchievements();
+            }
+            this.updateAPUI();
         };
 
         UpgradeEvents.onUpgradePurchased = () => {
@@ -127,11 +145,13 @@ export class UIManager {
 
         ForestEvents.onWoodGenerated = () => {
             this.updateHUD();
+            this.updateAPUI();
         };
 
         SaveEvents.onOfflineGains = (amount) => {
             alert(`Welcome back! Your idle workers collected ${amount} Basic Wood while you were away.`);
             this.updateHUD();
+            this.updateAPUI();
         };
 
         ChopEvents.onPhaseChange = (phase, maxPhases) => {
@@ -201,8 +221,23 @@ export class UIManager {
             document.getElementById('rebirth-confirm-overlay')!.classList.add('hidden');
         });
 
+        document.getElementById('btn-achievements-open')!.addEventListener('click', () => {
+            document.getElementById('settings-overlay')!.classList.add('hidden');
+            this.switchScreen('screen-achievements');
+        });
+
+
         PrestigeEvents.onRebirth = (gained, total) => {
             this.updatePrestigeUI();
+        };
+
+        AchievementEvents.onAchievementUnlocked = () => {
+            this.renderAchievements();
+            this.updateAPUI();
+        };
+
+        AchievementEvents.onAPUpdated = () => {
+            this.updateAPUI();
         };
 
     }
@@ -224,6 +259,10 @@ export class UIManager {
         if (id === 'screen-upgrades') this.renderUpgrades();
         if (id === 'screen-axes') this.renderAxes();
         if (id === 'screen-forest') this.updateForestUI();
+        if (id === 'screen-achievements') {
+            this.renderAchievements();
+            this.updateAPUI();
+        }
     }
 
     private updateHUD() {
@@ -235,6 +274,18 @@ export class UIManager {
         let baseDmg = 1 + (state.upgrades['upg_strength'] || 0) * UPGRADES.upg_strength.effectPerLevel;
         let critChance = (state.upgrades['upg_luck'] || 0) * UPGRADES.upg_luck.effectPerLevel + (axe.critBonus || 0);
         this.axePowerLabel.textContent = `Base Dmg: ${Math.floor(baseDmg)} | Crit: ${Math.floor(critChance * 100)}%`;
+        if (this.curScreenId === 'screen-achievements') {
+            this.updateAPUI();
+        }
+    }
+
+    private updateAPUI() {
+        const ap = achievementSystem.getAP();
+        const bonusPct = (achievementSystem.getAPBonusMultiplier() - 1) * 100;
+        const apValue = this.getApValueLabel();
+        const apBonus = this.getApBonusLabel();
+        if (apValue) apValue.textContent = this.formatNum(ap);
+        if (apBonus) apBonus.textContent = `+${bonusPct.toFixed(1)}%`;
     }
 
     private renderTree() {
@@ -449,6 +500,39 @@ export class UIManager {
         }
     }
 
+    private renderAchievements() {
+        const list = this.getAchievementsList();
+        if (!list) return;
+        list.innerHTML = '';
+        const defs = achievementSystem.getDefinitions();
+
+        for (const def of defs) {
+            const progress = achievementSystem.getProgress(def.metric);
+            const isUnlocked = achievementSystem.isUnlocked(def.id);
+            const clamped = Math.min(progress, def.target);
+            const pct = Math.max(0, Math.min(100, (clamped / def.target) * 100));
+
+            const el = document.createElement('div');
+            el.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            el.innerHTML = `
+                <div class="achievement-info">
+                    <span class="achievement-name">${def.name}</span>
+                    <span class="achievement-desc">${def.description}</span>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-fill" style="width: ${pct}%"></div>
+                    </div>
+                    <span class="achievement-progress-text">${this.formatNum(clamped)} / ${this.formatNum(def.target)}</span>
+                </div>
+                <div class="achievement-reward">
+                    <span class="achievement-ap">+${def.apReward} AP</span>
+                    <span class="achievement-status">${isUnlocked ? 'Unlocked' : 'Locked'}</span>
+                </div>
+            `;
+
+            list.appendChild(el);
+        }
+    }
+
     private renderWoodInventory() {
         const list = document.getElementById('wood-inventory-list')!;
         list.innerHTML = '';
@@ -582,6 +666,8 @@ export class UIManager {
             this.renderAxes();
             this.updatePrestigeUI();
             this.checkUnlocks();
+            this.renderAchievements();
+            this.updateAPUI();
         }
     }
 

@@ -30,6 +30,16 @@ export const createInitialState = (): PlayerState => ({
         currentBiomeId: 'default',
         unlockedBiomes: ['default'],
     },
+    achievements: {
+        progress: {
+            treesChopped: 0,
+            woodCollected: 0,
+            rebirths: 0,
+            biomesUnlocked: 1,
+        },
+        unlocked: {},
+        totalAP: 0,
+    },
     lastSaveTimestamp: Date.now(),
 });
 

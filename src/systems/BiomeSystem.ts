@@ -1,6 +1,7 @@
 import { state } from '../core/State';
 import { BIOMES } from '../data/Biomes';
 import { BiomeId } from '../core/types';
+import { achievementSystem } from './AchievementSystem';
 
 export const BiomeEvents = {
     onBiomeUnlock: (biomeId: BiomeId) => { },
@@ -48,6 +49,7 @@ export class BiomeSystem {
         }
 
         state.biome.unlockedBiomes.push(biomeId);
+        achievementSystem.setProgress('biomesUnlocked', state.biome.unlockedBiomes.length);
         BiomeEvents.onBiomeUnlock(biomeId);
         return true;
     }

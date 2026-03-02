@@ -1,29 +1,41 @@
 - [x] Restate goal + acceptance criteria
-- [x] Locate Priority 5 implementation in source
-- [x] Compare target files for missing mechanics
-- [x] Implement Priority 5 mechanics in target
-- [x] Sync Priority 5 docs (if any)
-- [ ] Run build
-- [ ] Verify timer/phase/chest UI behavior
-- [x] Summarize changes + verification story
-
-## Working Notes
-- Source: /home/josh/projects/chopIt/chop-it-v1-1
-- Target: /home/josh/projects/chopIt/chop-it-v1-1-clean
-- Priority 5 scope: timed/multiPhase trees, special mechanics UI, chest mechanics
-
-## Acceptance Criteria
-- Priority 5 changes mirrored in target files
-- Any Priority 5 documentation updates applied
-- `npm run build` succeeds
-- Verified timer pill, phase indicator, chest toast behavior
-
-## Plan
-- [x] Restate goal + acceptance criteria
 - [x] Locate existing implementation / patterns
 - [x] Design: minimal approach + key decisions
-- [x] Implement smallest safe slice
-- [ ] Add/adjust tests (not expected)
-- [ ] Run verification (build + Playwright checks)
+- [x] Implement achievement data + system
+- [x] Wire achievement tracking into systems
+- [x] Update UI + styles for achievements
+- [x] Add AP bonus application + docs note
+- [x] Run verification (build + Playwright checks)
 - [x] Summarize changes + verification story
 - [ ] Record lessons (if any)
+
+## Working Notes
+- Repo: /home/josh/projects/chopIt/chop-it-v1-1-clean
+- Achievement stats: trees chopped, total wood, rebirths, biomes unlocked
+- AP bonus: apply to wood gains (+0.5% per AP)
+
+## Acceptance Criteria
+- Achievement definitions and state exist
+- Tracking hooks update progress on relevant systems
+- UI shows achievements list, AP, and AP bonus
+- `npm run build` succeeds
+- Playwright verifies list render + AP update
+
+## Plan
+- [ ] Restate goal + acceptance criteria
+- [ ] Locate existing implementation / patterns
+- [ ] Design: minimal approach + key decisions
+- [ ] Implement smallest safe slice
+- [ ] Add/adjust tests (not expected)
+- [ ] Run verification (build + Playwright checks)
+- [ ] Summarize changes + verification story
+- [ ] Record lessons (if any)
+
+## Results
+- Added achievement definitions, state, and tracking across chop/forest/prestige/biome flows.
+- Added achievements UI screen, AP summary, and AP bonus copy.
+- Applied AP bonus multiplier to wood gains from chopping and idle forest.
+
+## Verification
+- `npm run build`
+- Playwright: opened Achievements screen and confirmed AP display updates after simulated unlock.

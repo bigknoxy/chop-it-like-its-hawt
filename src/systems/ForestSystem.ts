@@ -1,6 +1,7 @@
 import { state } from '../core/State';
 import { UPGRADES } from '../data/Upgrades';
 import { prestigeSystem } from './PrestigeSystem';
+import { achievementSystem } from './AchievementSystem';
 
 export const ForestEvents = {
     onWoodGenerated: (amount: number) => { },
@@ -31,13 +32,14 @@ export class ForestSystem {
             state.forest.lastTickTimestamp = now;
 
             const wps = this.getWoodPerSecond();
-            const gained = wps * ticks;
+            const gained = achievementSystem.applyWoodBonus(wps * ticks);
 
             // Add to basic wood for idle gains (could expand to random wood types)
             state.woodByType['basic'] += gained;
             state.totalWood += gained;
 
             prestigeSystem.addLifetimeWood(gained);
+            achievementSystem.addProgress('woodCollected', gained);
 
             ForestEvents.onWoodGenerated(gained);
         }
@@ -57,13 +59,14 @@ export class ForestSystem {
         const ticks = Math.floor(effectiveMs / this.tickInterval);
         if (ticks > 0) {
             const wps = this.getWoodPerSecond();
-            const gained = wps * ticks;
+            const gained = achievementSystem.applyWoodBonus(wps * ticks);
 
             state.woodByType['basic'] += gained;
             state.totalWood += gained;
             state.forest.lastTickTimestamp = now;
 
             prestigeSystem.addLifetimeWood(gained);
+            achievementSystem.addProgress('woodCollected', gained);
 
             return gained;
         }

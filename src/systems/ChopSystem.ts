@@ -3,19 +3,33 @@ import { TREES } from '../data/Trees';
 import { AXES } from '../data/Axes';
 import { UPGRADES } from '../data/Upgrades';
 import { WOODS } from '../data/Woods';
+import { prestigeSystem } from './PrestigeSystem';
 import { biomeSystem } from './BiomeSystem';
-import { companionSystem } from './CompanionSystem';
+import { achievementSystem } from './AchievementSystem';
+import { questSystem } from './QuestSystem';
+import { skillSystem } from './SkillSystem';
+
+export type SpecialMechanicResult = {
+    type: 'chest' | 'timed' | 'multiPhase' | null;
+    bonusWood?: number;
+    isTimedBonus?: boolean;
+    phaseReward?: number;
+    phase?: number;
+    maxPhases?: number;
+};
 
 // Events to notify UI
 export const ChopEvents = {
     onDamage: (amount: number, isCrit: boolean) => { },
-    onTreeFall: (woodGained: number, woodId: string) => { },
+    onTreeFall: (woodGained: number, woodId: string, specialResult?: SpecialMechanicResult) => { },
     onWoodUpdate: () => { },
+    onPhaseChange: (phase: number, maxPhases: number) => { },
+    onChestOpen: () => { },
 };
 
 export class ChopSystem {
     private lastHitTime: number = 0;
-    private hitIntervalMs: number = 100; // 10 hits per second while holding
+    private baseHitIntervalMs: number = 100;
     private isHolding: boolean = false;
 
     private getDamage(): { amount: number; isCrit: boolean } {
@@ -33,10 +47,16 @@ export class ChopSystem {
         const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
         baseDamage *= axe.damageMultiplier;
 
+        baseDamage *= prestigeSystem.getMultiplier();
+
+        const skillBonuses = skillSystem.getTotalBonuses();
+        baseDamage *= 1 + (skillBonuses.damagePct || 0);
+
         // Crit
         const upgLuckLvl = state.upgrades['upg_luck'] || 0;
         let critChance = upgLuckLvl * UPGRADES.upg_luck.effectPerLevel;
         critChance += axe.critBonus || 0;
+        critChance += skillBonuses.critChancePct || 0;
 
         let isCrit = Math.random() < critChance;
 
@@ -63,22 +83,18 @@ export class ChopSystem {
     public update(dt: number) {
         // Handle Auto-Chop
         const autoChopLvl = state.upgrades['upg_autochop'] || 0;
-        let autoDps = 0;
         if (autoChopLvl > 0) {
-            autoDps += autoChopLvl * UPGRADES.upg_autochop.effectPerLevel;
-        }
-
-        // Handle Companion Auto Chop
-        autoDps += companionSystem.getActiveDPS();
-
-        if (autoDps > 0) {
-            this.applyDamage(autoDps * dt, false);
+            const autoDps = autoChopLvl * UPGRADES.upg_autochop.effectPerLevel;
+            const skillBonuses = skillSystem.getTotalBonuses();
+            const bonusMultiplier = 1 + (skillBonuses.autoChopPct || 0);
+            this.applyDamage(autoDps * dt * bonusMultiplier, false);
         }
 
         // Handle Holding
         if (this.isHolding) {
             const now = performance.now();
-            if (now - this.lastHitTime >= this.hitIntervalMs) {
+            const hitIntervalMs = this.getHitIntervalMs();
+            if (now - this.lastHitTime >= hitIntervalMs) {
                 this.hit();
             }
         }
@@ -91,14 +107,54 @@ export class ChopSystem {
         ChopEvents.onDamage(amount, isCrit);
     }
 
+    private getHitIntervalMs(): number {
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === 'fastTick') {
+            return this.baseHitIntervalMs * 0.5;
+        }
+        return this.baseHitIntervalMs;
+    }
+
     private applyDamage(amount: number, isCrit: boolean) {
         if (!currentTree.isActive) return;
+        const def = TREES[currentTree.defId];
+        const maxPhases = def.phaseCount || 1;
 
         currentTree.currentHP -= amount;
+
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === 'splashDamage') {
+            // Placeholder: splash would affect other trees in biome (future multi-tree)
+            // For now, just track that splash is active
+        }
+
+        if (def.specialMechanic === 'multiPhase' && maxPhases > 1) {
+            const phaseHP = def.maxHP / maxPhases;
+            const newPhase = Math.ceil(currentTree.currentHP / phaseHP);
+            const currentPhase = currentTree.currentPhase || maxPhases;
+
+            if (newPhase < currentPhase && newPhase >= 1) {
+                currentTree.currentPhase = newPhase;
+                this.givePhaseReward(def, newPhase);
+                ChopEvents.onPhaseChange(newPhase, maxPhases);
+            }
+        }
 
         if (currentTree.currentHP <= 0) {
             this.breakTree();
         }
+    }
+
+    private givePhaseReward(def: typeof TREES[string], phase: number) {
+        const phaseReward = Math.ceil(def.baseWoodYield * 0.3);
+        const bonusReward = Math.ceil(achievementSystem.applyWoodBonus(phaseReward));
+        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + bonusReward;
+        const woodDef = WOODS[def.woodTypeId];
+        const totalAdded = bonusReward * woodDef.valueMultiplier;
+        state.totalWood += totalAdded;
+        achievementSystem.addProgress('woodCollected', totalAdded);
+        questSystem.addProgress('woodCollected', totalAdded);
+        ChopEvents.onWoodUpdate();
     }
 
     private breakTree() {
@@ -106,29 +162,96 @@ export class ChopSystem {
         currentTree.isActive = false;
 
         const def = TREES[currentTree.defId];
+        let specialResult: SpecialMechanicResult = { type: null };
 
-        // Calculate Reward
         let woodGain = def.baseWoodYield;
         const upgAxeSizeLvl = state.upgrades['upg_axe_size'] || 0;
-        // axe size gives slight yield boost: 2% per level? PRD says "slightly boosts yield"
         woodGain *= 1 + (upgAxeSizeLvl * 0.02);
 
-        // Wood value multiplier (handled at currency addition, or pre-calculated)
-        // Actually PRD says woodGain = baseWoodYield * (1+bonus) * valueMultiplier.
-        // valueMultiplier makes the amount bigger? Oh, "wood types act as currencies". The resource count goes up physically by the multiplier or it goes to `woodByType` container.
-        // Add wood
-        const baseWood = def.baseWoodYield;
-        const totalYield = Math.ceil(baseWood * WOODS[def.woodTypeId].valueMultiplier);
-        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + totalYield;
-        state.totalWood += totalYield;
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === 'doubleWood' && Math.random() < 0.2) {
+            woodGain *= 2;
+        }
 
-        ChopEvents.onTreeFall(totalYield, def.woodTypeId);
+        if (def.specialMechanic === 'chest') {
+            if (Math.random() < 0.10) {
+                const bonusWood = Math.ceil(woodGain * 2);
+                woodGain += bonusWood;
+                specialResult = { type: 'chest', bonusWood };
+                ChopEvents.onChestOpen();
+            }
+        }
+
+        if (def.specialMechanic === 'timed' && currentTree.spawnTime) {
+            const elapsedMs = Date.now() - currentTree.spawnTime;
+            if (elapsedMs <= 15000) {
+                const bonusWood = Math.ceil(woodGain);
+                woodGain += bonusWood;
+                specialResult = { type: 'timed', bonusWood, isTimedBonus: true };
+            }
+        }
+
+        if (def.specialMechanic === 'multiPhase') {
+            const maxPhases = def.phaseCount || 3;
+            specialResult = {
+                type: 'multiPhase',
+                phase: 0,
+                maxPhases
+            };
+        }
+
+        woodGain = Math.ceil(woodGain);
+        woodGain = Math.ceil(achievementSystem.applyWoodBonus(woodGain));
+
+        state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
+
+        const woodDef = WOODS[def.woodTypeId];
+        const skillBonuses = skillSystem.getTotalBonuses();
+        const valueMultiplier = woodDef.valueMultiplier * (1 + (skillBonuses.woodValuePct || 0));
+        const totalAdded = woodGain * valueMultiplier;
+        state.totalWood += totalAdded;
+        achievementSystem.addProgress('woodCollected', totalAdded);
+        questSystem.addProgress('woodCollected', totalAdded);
+
+        prestigeSystem.addLifetimeWood(totalAdded);
+        achievementSystem.addProgress('treesChopped', 1);
+        questSystem.addProgress('treesChopped', 1);
+
+        ChopEvents.onTreeFall(woodGain, def.woodTypeId, specialResult);
         ChopEvents.onWoodUpdate();
 
+        setTimeout(() => this.spawnNextTree(), 500);
+    }
 
-        // Spawn a new tree from the active biome's pool
-        currentTree.isActive = false;
-        biomeSystem.spawnTreeForBiome(state.activeBiomeId);
+    private spawnNextTree() {
+        const allowedTrees = biomeSystem.getAllowedTrees();
+
+        const totalWeight = allowedTrees.reduce((sum, treeId) => {
+            const tree = TREES[treeId];
+            return sum + (tree ? tree.spawnWeight : 0);
+        }, 0);
+
+        let rand = Math.random() * totalWeight;
+
+        let selectedId = allowedTrees[0] || 'tree_basic';
+        for (const treeId of allowedTrees) {
+            const tree = TREES[treeId];
+            if (!tree) continue;
+            if (rand < tree.spawnWeight) {
+                selectedId = tree.id;
+                break;
+            }
+            rand -= tree.spawnWeight;
+        }
+
+        const def = TREES[selectedId];
+        setCurrentTree({
+            defId: selectedId,
+            currentHP: def.maxHP,
+            isActive: true,
+            spawnTime: Date.now(),
+            currentPhase: def.phaseCount || 1,
+        });
     }
 }
 

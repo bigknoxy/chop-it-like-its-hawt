@@ -1,5 +1,9 @@
 import { state } from '../core/State';
 import { UPGRADES } from '../data/Upgrades';
+import { prestigeSystem } from './PrestigeSystem';
+import { achievementSystem } from './AchievementSystem';
+import { questSystem } from './QuestSystem';
+import { skillSystem } from './SkillSystem';
 
 export const ForestEvents = {
     onWoodGenerated: (amount: number) => { },
@@ -15,7 +19,9 @@ export class ForestSystem {
         const effLevel = state.upgrades['upg_forest_efficiency'] || 0;
         const multiplier = 1 + (effLevel * UPGRADES.upg_forest_efficiency.effectPerLevel);
 
-        return base * multiplier;
+        const skillBonuses = skillSystem.getTotalBonuses();
+        const valueMultiplier = 1 + (skillBonuses.woodValuePct || 0);
+        return base * multiplier * prestigeSystem.getMultiplier() * valueMultiplier;
     }
 
     public update() {
@@ -30,11 +36,15 @@ export class ForestSystem {
             state.forest.lastTickTimestamp = now;
 
             const wps = this.getWoodPerSecond();
-            const gained = wps * ticks;
+            const gained = achievementSystem.applyWoodBonus(wps * ticks);
 
             // Add to basic wood for idle gains (could expand to random wood types)
             state.woodByType['basic'] += gained;
             state.totalWood += gained;
+
+            prestigeSystem.addLifetimeWood(gained);
+            achievementSystem.addProgress('woodCollected', gained);
+            questSystem.addProgress('woodCollected', gained);
 
             ForestEvents.onWoodGenerated(gained);
         }
@@ -54,13 +64,17 @@ export class ForestSystem {
         const ticks = Math.floor(effectiveMs / this.tickInterval);
         if (ticks > 0) {
             const wps = this.getWoodPerSecond();
-            const gained = wps * ticks;
+            const gained = achievementSystem.applyWoodBonus(wps * ticks);
 
             state.woodByType['basic'] += gained;
             state.totalWood += gained;
             state.forest.lastTickTimestamp = now;
 
-            return gained; // Return amount to show offline modal
+            prestigeSystem.addLifetimeWood(gained);
+            achievementSystem.addProgress('woodCollected', gained);
+            questSystem.addProgress('woodCollected', gained);
+
+            return gained;
         }
         return 0;
     }

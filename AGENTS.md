@@ -32,7 +32,7 @@ npx tsc --noEmit
 src/
 ├── core/           # Game engine, state, types
 ├── data/           # Static data (trees, axes, upgrades, wood types)
-├── systems/        # Game systems (chop, upgrade, forest, axe, save)
+├── systems/        # Game systems (chop, upgrade, forest, axe, prestige, biome, achievements, quests, skills, save)
 ├── ui/             # UI management
 ├── main.ts         # Entry point
 └── style.css       # Global styles

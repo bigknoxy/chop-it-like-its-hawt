@@ -1,34 +1,34 @@
 import { BiomeDefinition } from '../core/types';
 
 export const BIOMES: Record<string, BiomeDefinition> = {
-    home_forest: {
-        id: 'home_forest',
-        name: 'The Home Forest',
-        description: 'A peaceful starting area with basic trees.',
-        emoji: '🏞️',
-        unlockCost: [], // Unlocked by default
-        spawnableTrees: ['tree_basic', 'tree_sturdy', 'tree_tough', 'tree_golden'],
+    default: {
+        id: 'default',
+        name: 'Forest',
+        description: 'A peaceful forest with common trees.',
+        unlockCost: {},
+        allowedTrees: ['tree_basic', 'tree_sturdy', 'tree_tough', 'tree_golden'],
+        emoji: '🌲'
     },
-    haunted_weald: {
-        id: 'haunted_weald',
-        name: 'Haunted Weald',
-        description: 'Spooky woods where tougher variants spawn frequently.',
-        emoji: '🕸️',
-        unlockCost: [
-            { woodTypeId: 'pine', amount: 1500 },
-            { woodTypeId: 'oak', amount: 500 },
-        ],
-        spawnableTrees: ['tree_tough', 'tree_golden', 'tree_spooky', 'tree_cursed_ash'],
+    crystal_caverns: {
+        id: 'crystal_caverns',
+        name: 'Crystal Caverns',
+        description: 'Deep caves filled with crystalline trees and rare gems.',
+        unlockCost: {
+            wood: { amount: 500 },
+            growthEssence: 5
+        },
+        allowedTrees: ['crystal_oak', 'gem_willow', 'diamond_pine'],
+        emoji: '💎'
     },
-    frozen_tundra: {
-        id: 'frozen_tundra',
-        name: 'Frozen Tundra',
-        description: 'Brittle, ice-hardened trees that drop frozen sap.',
-        emoji: '❄️',
-        unlockCost: [
-            { woodTypeId: 'oak', amount: 2500 },
-            { woodTypeId: 'spooky_wood', amount: 1000 },
-        ],
-        spawnableTrees: ['tree_glacier_pine', 'tree_crystal_birch', 'tree_golden'],
-    },
+    volcanic_grove: {
+        id: 'volcanic_grove',
+        name: 'Volcanic Grove',
+        description: 'Smoldering groves where embers cling to every branch.',
+        unlockCost: {
+            wood: { amount: 1000 },
+            growthEssence: 20
+        },
+        allowedTrees: ['ember_oak', 'magma_willow', 'phoenix_pine'],
+        emoji: '🌲'
+    }
 };

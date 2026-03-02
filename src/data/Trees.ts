@@ -39,43 +39,87 @@ export const TREES: Record<string, TreeDefinition> = {
         specialMechanic: 'chest',
         emoji: '✨'
     },
-    // ---- Haunted Weald Trees ----
-    tree_spooky: {
-        id: 'tree_spooky',
-        name: 'Weeping Willow',
-        maxHP: 5000,
-        baseWoodYield: 100,
-        woodTypeId: 'spooky_wood',
-        spawnWeight: 50,
-        emoji: '🥀'
-    },
-    tree_cursed_ash: {
-        id: 'tree_cursed_ash',
-        name: 'Cursed Ash',
-        maxHP: 20000,
-        baseWoodYield: 250,
-        woodTypeId: 'spooky_wood',
+    tree_rush: {
+        id: 'tree_rush',
+        name: 'Rush Birch',
+        maxHP: 60,
+        baseWoodYield: 8,
+        woodTypeId: 'basic',
         spawnWeight: 20,
-        emoji: '🌪️'
+        specialMechanic: 'timed',
+        phaseCount: 1,
+        emoji: '⚡'
     },
-    // ---- Frozen Tundra Trees ----
-    tree_glacier_pine: {
-        id: 'tree_glacier_pine',
-        name: 'Glacier Pine',
-        maxHP: 80000,
-        baseWoodYield: 500,
-        woodTypeId: 'glacier_sap',
-        spawnWeight: 40,
-        emoji: '🧊'
+    tree_elder: {
+        id: 'tree_elder',
+        name: 'Elder Oak',
+        maxHP: 600,
+        baseWoodYield: 20,
+        woodTypeId: 'oak',
+        spawnWeight: 12,
+        specialMechanic: 'multiPhase',
+        phaseCount: 3,
+        emoji: '🌳'
     },
-    tree_crystal_birch: {
-        id: 'tree_crystal_birch',
-        name: 'Crystal Birch',
-        maxHP: 250000,
-        baseWoodYield: 1500,
-        woodTypeId: 'glacier_sap',
-        spawnWeight: 15,
+    crystal_oak: {
+        id: 'crystal_oak',
+        name: 'Crystal Oak',
+        maxHP: 500,
+        baseWoodYield: 12,
+        woodTypeId: 'crystal_shard',
+        spawnWeight: 50,
+        biome: 'crystal_caverns',
         emoji: '💎'
+    },
+    gem_willow: {
+        id: 'gem_willow',
+        name: 'Gem Willow',
+        maxHP: 1200,
+        baseWoodYield: 8,
+        woodTypeId: 'gemstone',
+        spawnWeight: 25,
+        biome: 'crystal_caverns',
+        emoji: '💠'
+    },
+    diamond_pine: {
+        id: 'diamond_pine',
+        name: 'Diamond Pine',
+        maxHP: 3000,
+        baseWoodYield: 6,
+        woodTypeId: 'diamond_dust',
+        spawnWeight: 10,
+        biome: 'crystal_caverns',
+        emoji: '🔷'
+    },
+    ember_oak: {
+        id: 'ember_oak',
+        name: 'Ember Oak',
+        maxHP: 1400,
+        baseWoodYield: 12,
+        woodTypeId: 'ember_ash',
+        spawnWeight: 45,
+        biome: 'volcanic_grove',
+        emoji: '🌲'
+    },
+    magma_willow: {
+        id: 'magma_willow',
+        name: 'Magma Willow',
+        maxHP: 2400,
+        baseWoodYield: 9,
+        woodTypeId: 'magma_core',
+        spawnWeight: 25,
+        biome: 'volcanic_grove',
+        emoji: '🌳'
+    },
+    phoenix_pine: {
+        id: 'phoenix_pine',
+        name: 'Phoenix Pine',
+        maxHP: 4200,
+        baseWoodYield: 7,
+        woodTypeId: 'phoenix_feather',
+        spawnWeight: 10,
+        biome: 'volcanic_grove',
+        emoji: '🌲'
     }
 };
 

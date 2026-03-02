@@ -1,22 +1,24 @@
-export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | string;
+export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'spooky_wood' | 'glacier_sap' | 'crystal_shard' | 'gemstone' | 'diamond_dust' | 'ember_ash' | 'magma_core' | 'phoenix_feather' | string;
+
+export type BiomeId = 'default' | 'crystal_caverns' | 'volcanic_grove' | string;
+
+export interface BiomeDefinition {
+  id: BiomeId;
+  name: string;
+  description: string;
+  unlockCost: {
+    wood?: { amount: number };
+    growthEssence?: number;
+  };
+  allowedTrees: string[];
+  emoji: string;
+}
 
 export interface WoodType {
   id: WoodTypeId;
   name: string;
   valueMultiplier: number;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
-}
-
-export type BiomeId = 'home_forest' | 'frozen_tundra' | 'haunted_weald' | 'crystal_caverns' | string;
-
-export interface BiomeDefinition {
-  id: BiomeId;
-  name: string;
-  description: string;
-  emoji: string;
-  unlockCost: { woodTypeId: WoodTypeId; amount: number }[];
-  // Which trees can spawn in this biome
-  spawnableTrees: string[]; // tree IDs
 }
 
 export type CompanionId = 'beaver_bob' | 'woodpecker_willy' | 'bear_barry' | string;
@@ -41,12 +43,16 @@ export interface TreeDefinition {
   spawnWeight: number;
   emoji: string;
   specialMechanic?: 'chest' | 'timed' | 'multiPhase' | string;
+  biome?: BiomeId;
+  phaseCount?: number;
 }
 
 export interface TreeInstance {
   defId: string;
   currentHP: number;
   isActive: boolean;
+  spawnTime?: number;
+  currentPhase?: number;
 }
 
 export type UpgradeEffectType =
@@ -87,6 +93,91 @@ export interface ForestState {
   lastTickTimestamp: number;
 }
 
+export interface PrestigeState {
+  growthEssence: number;
+  lifetimeWood: number;
+  totalRebirths: number;
+  lastRebirthTimestamp: number;
+}
+
+export interface BiomeState {
+  currentBiomeId: BiomeId;
+  unlockedBiomes: BiomeId[];
+}
+
+export type AchievementId = string;
+export type AchievementMetric = 'treesChopped' | 'woodCollected' | 'rebirths' | 'biomesUnlocked';
+
+export type DailyQuestMetric = 'treesChopped' | 'woodCollected' | 'upgradesPurchased';
+
+export interface AchievementDefinition {
+  id: AchievementId;
+  name: string;
+  description: string;
+  metric: AchievementMetric;
+  target: number;
+  apReward: number;
+}
+
+export interface AchievementState {
+  progress: Record<AchievementMetric, number>;
+  unlocked: Record<AchievementId, boolean>;
+  totalAP: number;
+}
+
+export interface DailyQuestReward {
+  wood: number;
+  growthEssence: number;
+}
+
+export interface DailyQuestDefinition {
+  id: string;
+  title: string;
+  description: string;
+  metric: DailyQuestMetric;
+  target: number;
+  reward: DailyQuestReward;
+}
+
+export interface DailyLoginState {
+  dayIndex: number;
+  claimedToday: boolean;
+  lastClaimDay: string;
+}
+
+export interface DailyState {
+  lastResetDay: string;
+  progress: Record<DailyQuestMetric, number>;
+  claimed: Record<string, boolean>;
+  login: DailyLoginState;
+}
+
+export type SkillBranch = 'chopping' | 'collection' | 'automation' | 'luck';
+
+export interface SkillBonuses {
+  damagePct?: number;
+  woodValuePct?: number;
+  autoChopPct?: number;
+  critChancePct?: number;
+}
+
+export type SkillId = string;
+
+export interface SkillDefinition {
+  id: SkillId;
+  name: string;
+  description: string;
+  branch: SkillBranch;
+  cost: number;
+  requires?: SkillId[];
+  bonuses: SkillBonuses;
+}
+
+export interface SkillState {
+  unlocked: Record<SkillId, boolean>;
+  totalSpent: number;
+}
+
 export interface PlayerState {
   totalWood: number;
   woodByType: Record<WoodTypeId, number>;
@@ -94,12 +185,10 @@ export interface PlayerState {
   ownedAxes: string[];
   equippedAxeId: string;
   forest: ForestState;
-
-  // V2 Additions
-  activeBiomeId: BiomeId;
-  unlockedBiomes: BiomeId[];
-  equippedCompanionId: string | null;
-  companions: Record<string, number>; // companionId -> level (0 means unlocked, undefined means locked)
-
+  prestige: PrestigeState;
+  biome: BiomeState;
+  achievements: AchievementState;
+  skills: SkillState;
+  daily: DailyState;
   lastSaveTimestamp: number;
 }

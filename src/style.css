@@ -57,6 +57,7 @@ body {
   background-color: rgba(30, 33, 36, 0.9);
   border-bottom: 2px solid #111;
   z-index: 10;
+  gap: 10px;
 }
 
 .currency-container {
@@ -78,16 +79,23 @@ body {
   align-items: flex-end;
   font-size: 0.9rem;
   margin-right: 40px;
+  min-width: 0;
 }
 
 #ui-equipped-axe {
   font-weight: bold;
   color: var(--accent-color);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 #ui-axe-power {
   color: var(--text-muted);
   font-size: 0.8rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* Main View */
@@ -114,6 +122,12 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: -1;
+}
+
+#timer-display.hidden,
+#phase-display.hidden,
+#special-indicator.hidden {
+  display: none;
 }
 
 .screen.active {
@@ -201,8 +215,46 @@ body {
   }
 }
 
+@keyframes toastPop {
+  0% {
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px) scale(1.02);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-25px) scale(0.98);
+  }
+}
+
+@keyframes chestPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .tree-fall {
   animation: fall 0.4s ease-in forwards;
+}
+
+.tree-sprite.chest-pulse {
+  animation: chestPulse 0.6s ease;
 }
 
 #hp-bar-container {
@@ -236,6 +288,55 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.special-status {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.special-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 18, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.special-pill.expired {
+  color: var(--danger-color);
+  border-color: rgba(240, 71, 71, 0.6);
+}
+
+.special-toast {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 25, 30, 0.95);
+  color: var(--wood-color);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.special-toast.special-toast-show {
+  animation: toastPop 2s ease forwards;
 }
 
 .damage-number {
@@ -299,9 +400,438 @@ body {
   gap: 10px;
 }
 
-/* Upgrade / Generic Item */
-.upgrade-item,
-.map-item {
+/* Achievements */
+.achievement-summary {
+  display: flex;
+  gap: 12px;
+  background: #22252a;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.achievement-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.achievement-summary-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.achievement-summary-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--wood-color);
+}
+
+.achievement-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.achievement-list {
+  gap: 12px;
+}
+
+.achievement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2f3238;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #202225;
+}
+
+.achievement-item.unlocked {
+  border-color: rgba(209, 154, 102, 0.6);
+  box-shadow: 0 0 0 1px rgba(209, 154, 102, 0.15);
+}
+
+.achievement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.achievement-name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.achievement-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.achievement-progress {
+  height: 6px;
+  background: #1a1c20;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.achievement-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7289da, #d19a66);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.achievement-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.achievement-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 90px;
+}
+
+.achievement-ap {
+  font-weight: bold;
+  color: var(--accent-color);
+}
+
+.achievement-status {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.achievement-item.unlocked .achievement-status {
+  color: #9fe88b;
+}
+
+/* Skills */
+.skill-summary {
+  display: flex;
+  gap: 12px;
+  background: #22252a;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.skill-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skill-summary-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.skill-summary-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--wood-color);
+}
+
+.skill-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* Biomes */
+.biome-current-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #22252a;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.biome-current-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.biome-current-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--wood-color);
+}
+
+.biome-list {
+  gap: 12px;
+}
+
+.biome-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2f3238;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #202225;
+  gap: 12px;
+}
+
+.biome-item.unlocked {
+  border-color: rgba(159, 232, 139, 0.35);
+  box-shadow: 0 0 0 1px rgba(159, 232, 139, 0.1);
+}
+
+.biome-item.active {
+  border-color: rgba(209, 154, 102, 0.6);
+  box-shadow: 0 0 0 1px rgba(209, 154, 102, 0.2);
+}
+
+.biome-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.biome-name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.biome-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.biome-requirements {
+  font-size: 0.8rem;
+  color: var(--accent-color);
+}
+
+.biome-action-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 92px;
+}
+
+.biome-action-btn:disabled {
+  background-color: #4f545c;
+  color: #72767d;
+  cursor: not-allowed;
+}
+
+.skill-tree-list {
+  gap: 16px;
+}
+
+.skill-branch {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #2a2d33;
+  border: 1px solid #202225;
+}
+
+.skill-branch-header {
+  font-weight: bold;
+  color: var(--accent-color);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.skill-node {
+  background-color: #36393f;
+  border: 1px solid #202225;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.skill-node:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--accent-color);
+}
+
+.skill-node:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.skill-node.unlocked {
+  border-color: rgba(159, 232, 139, 0.6);
+  box-shadow: 0 0 0 1px rgba(159, 232, 139, 0.2);
+}
+
+.skill-name {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.skill-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.skill-cost {
+  font-size: 0.75rem;
+  color: var(--accent-color);
+}
+
+/* Daily Quests */
+.daily-login-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #24272d;
+  border: 1px solid #1b1d21;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.daily-login-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-login-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.daily-login-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-list {
+  gap: 12px;
+}
+
+.daily-quest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2f3238;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #202225;
+  gap: 12px;
+}
+
+.daily-quest-item.complete {
+  border-color: rgba(114, 137, 218, 0.5);
+  box-shadow: 0 0 0 1px rgba(114, 137, 218, 0.15);
+}
+
+.daily-quest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.daily-quest-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.daily-quest-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-progress {
+  height: 6px;
+  background: #1a1c20;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.daily-quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ea1ff, #69d18f);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.daily-quest-progress-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.daily-quest-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 140px;
+  text-align: right;
+}
+
+.daily-quest-reward span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.daily-claim-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.daily-claim-btn:disabled {
+  background-color: #4f545c;
+  color: #72767d;
+  cursor: not-allowed;
+}
+
+/* Upgrade Item */
+.upgrade-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -310,19 +840,6 @@ body {
   border-radius: 8px;
   border: 1px solid #202225;
 }
-
-.map-item.unlocked {
-  border-color: var(--accent-color);
-  background-color: rgba(114, 137, 218, 0.1);
-}
-
-.map-item.active-biome {
-  border-color: var(--wood-color);
-  background-color: rgba(209, 154, 102, 0.2);
-  box-shadow: 0 0 10px rgba(209, 154, 102, 0.5);
-}
-
-
 
 .upgrade-info {
   display: flex;
@@ -373,6 +890,7 @@ body {
   align-items: center;
   border-top: 2px solid #111;
   z-index: 10;
+  overflow-x: auto;
 }
 
 .nav-button {
@@ -390,6 +908,7 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   pointer-events: auto;
+  min-width: 70px;
 }
 
 .nav-button.active {
@@ -454,8 +973,157 @@ body {
   background-color: var(--danger-color);
 }
 
+.settings-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #4f545c;
+}
+
+.settings-section h3 {
+  margin-bottom: 10px;
+  color: var(--accent-color);
+}
+
+.settings-section p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+#prestige-section {
+  text-align: left;
+}
+
+#prestige-unlocked p {
+  display: flex;
+  justify-content: space-between;
+}
+
+#btn-rebirth {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.warning-box {
+  background-color: rgba(240, 71, 71, 0.1);
+  border: 1px solid var(--danger-color);
+  border-radius: 6px;
+  padding: 10px;
+  margin: 10px 0;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.warning-box p {
+  margin: 5px 0;
+}
+
+.warning-box ul {
+  margin: 5px 0 5px 20px;
+  padding: 0;
+}
+
+.warning-box li {
+  margin: 3px 0;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
+
+#btn-confirm-rebirth {
+  background-color: var(--accent-color);
+}
+
+#btn-cancel-rebirth {
+  background-color: #4f545c;
+}
+
+
 /* Hidden by default text for unlocking */
 #nav-btn-forest {
   visibility: hidden;
-  /* Revealed later */
+}
+
+.wood-inventory-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wood-inventory-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.wood-inventory-modal {
+  max-width: 350px;
+}
+
+.wood-inventory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.wood-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #36393f;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--text-muted);
+}
+
+.wood-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wood-item-name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.wood-item-value {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.wood-item-amount {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.wood-item.rarity-common {
+  border-left-color: #808080;
+}
+
+.wood-item.rarity-rare {
+  border-left-color: #4a90d9;
+}
+
+.wood-item.rarity-epic {
+  border-left-color: #a855f7;
+}
+
+.wood-item.rarity-legendary {
+  border-left-color: #fbbf24;
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, #36393f 100%);
+}
+
+.wood-item.rarity-legendary .wood-item-name {
+  color: #fbbf24;
 }

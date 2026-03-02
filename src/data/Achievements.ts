@@ -1,0 +1,68 @@
+import { AchievementDefinition } from '../core/types';
+
+export const ACHIEVEMENTS: AchievementDefinition[] = [
+    {
+        id: 'trees_10',
+        name: 'First Splinters',
+        description: 'Chop 10 trees.',
+        metric: 'treesChopped',
+        target: 10,
+        apReward: 1,
+    },
+    {
+        id: 'trees_100',
+        name: 'Lumberjack',
+        description: 'Chop 100 trees.',
+        metric: 'treesChopped',
+        target: 100,
+        apReward: 3,
+    },
+    {
+        id: 'wood_500',
+        name: 'Warm Kindling',
+        description: 'Collect 500 total wood value.',
+        metric: 'woodCollected',
+        target: 500,
+        apReward: 1,
+    },
+    {
+        id: 'wood_5000',
+        name: 'Stockpile',
+        description: 'Collect 5,000 total wood value.',
+        metric: 'woodCollected',
+        target: 5000,
+        apReward: 4,
+    },
+    {
+        id: 'rebirth_1',
+        name: 'Fresh Growth',
+        description: 'Rebirth 1 time.',
+        metric: 'rebirths',
+        target: 1,
+        apReward: 2,
+    },
+    {
+        id: 'rebirth_5',
+        name: 'Cycle Keeper',
+        description: 'Rebirth 5 times.',
+        metric: 'rebirths',
+        target: 5,
+        apReward: 6,
+    },
+    {
+        id: 'biomes_2',
+        name: 'Trailblazer',
+        description: 'Unlock 2 biomes.',
+        metric: 'biomesUnlocked',
+        target: 2,
+        apReward: 3,
+    },
+    {
+        id: 'biomes_3',
+        name: 'World Roamer',
+        description: 'Unlock 3 biomes.',
+        metric: 'biomesUnlocked',
+        target: 3,
+        apReward: 5,
+    },
+];

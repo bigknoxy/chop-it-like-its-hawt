@@ -1,5 +1,6 @@
 import { state, loadState, createInitialState } from '../core/State';
 import { forestSystem } from './ForestSystem';
+import { questSystem } from './QuestSystem';
 
 export const SaveEvents = {
     onOfflineGains: (amount: number) => { },
@@ -18,6 +19,7 @@ export class SaveSystem {
                 const parsed = JSON.parse(data);
                 // Merge with initial state to catch any missing fields from updates
                 loadState({ ...createInitialState(), ...parsed });
+                questSystem.syncFromState();
 
                 // Process offline gains
                 const gained = forestSystem.processOfflineGains(state.lastSaveTimestamp);

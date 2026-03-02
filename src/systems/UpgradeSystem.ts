@@ -1,5 +1,6 @@
 import { state } from '../core/State';
 import { UPGRADES } from '../data/Upgrades';
+import { questSystem } from './QuestSystem';
 
 export const UpgradeEvents = {
     onUpgradePurchased: (upgradeId: string, newLevel: number) => { },
@@ -45,6 +46,7 @@ export class UpgradeSystem {
         const currentLvl = state.upgrades[upgradeId] || 0;
         state.upgrades[upgradeId] = currentLvl + 1;
 
+        questSystem.addProgress('upgradesPurchased', 1);
         UpgradeEvents.onUpgradePurchased(upgradeId, state.upgrades[upgradeId]);
         return true;
     }

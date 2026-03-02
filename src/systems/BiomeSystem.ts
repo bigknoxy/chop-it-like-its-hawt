@@ -1,83 +1,74 @@
-import { state, setCurrentTree } from '../core/State';
+import { state } from '../core/State';
 import { BIOMES } from '../data/Biomes';
-import { TREES } from '../data/Trees';
-import { ChopEvents } from './ChopSystem'; // Need to trigger re-renders if we switch biomes
+import { BiomeId } from '../core/types';
+import { achievementSystem } from './AchievementSystem';
 
 export const BiomeEvents = {
-    onBiomeUnlocked: (biomeId: string) => { },
-    onBiomeChanged: (biomeId: string) => { },
+    onBiomeUnlock: (biomeId: BiomeId) => { },
+    onBiomeChange: (biomeId: BiomeId) => { },
 };
 
 export class BiomeSystem {
-    public canAfford(biomeId: string): boolean {
-        const def = BIOMES[biomeId];
-        if (!def) return false;
-
-        for (const cost of def.unlockCost) {
-            const currentAmount = state.woodByType[cost.woodTypeId] || 0;
-            if (currentAmount < cost.amount) return false;
-        }
-        return true;
+    public getCurrentBiome(): BiomeId {
+        return state.biome?.currentBiomeId || 'default';
     }
 
-    public isUnlocked(biomeId: string): boolean {
-        return state.unlockedBiomes.includes(biomeId);
+    public getUnlockedBiomes(): BiomeId[] {
+        return state.biome?.unlockedBiomes || ['default'];
     }
 
-    public unlock(biomeId: string): boolean {
-        if (this.isUnlocked(biomeId)) return false;
-        if (!this.canAfford(biomeId)) return false;
-
-        const def = BIOMES[biomeId];
-        for (const cost of def.unlockCost) {
-            state.woodByType[cost.woodTypeId] -= cost.amount;
-        }
-
-        state.unlockedBiomes.push(biomeId);
-        BiomeEvents.onBiomeUnlocked(biomeId);
-
-        // Auto travel? Let user travel manually to avoid confusion while chopping.
-        return true;
+    public isBiomeUnlocked(biomeId: BiomeId): boolean {
+        return this.getUnlockedBiomes().includes(biomeId);
     }
 
-    public travelTo(biomeId: string): boolean {
-        if (!this.isUnlocked(biomeId)) return false;
-        if (state.activeBiomeId === biomeId) return false;
-
-        state.activeBiomeId = biomeId;
-        BiomeEvents.onBiomeChanged(biomeId);
-
-        // Force spawn a new tree from the new biome immediately
-        this.spawnTreeForBiome(biomeId);
-
-        return true;
-    }
-
-    public spawnTreeForBiome(biomeId: string) {
+    public canUnlockBiome(biomeId: BiomeId): boolean {
         const biome = BIOMES[biomeId];
-        if (!biome || biome.spawnableTrees.length === 0) return;
+        if (!biome) return false;
+        if (this.isBiomeUnlocked(biomeId)) return false;
 
-        // Filter trees based on biome spawn list
-        const candidates = biome.spawnableTrees.map(tId => TREES[tId]).filter(Boolean);
-        if (candidates.length === 0) return;
+        const { wood, growthEssence } = biome.unlockCost;
 
-        const totalWeight = candidates.reduce((sum, def) => sum + def.spawnWeight, 0);
-        let rand = Math.random() * totalWeight;
+        if (wood && state.totalWood >= wood.amount) return true;
+        if (growthEssence && state.prestige.growthEssence >= growthEssence) return true;
 
-        let selectedId = candidates[0].id;
-        for (const tree of candidates) {
-            if (rand < tree.spawnWeight) {
-                selectedId = tree.id;
-                break;
-            }
-            rand -= tree.spawnWeight;
+        return false;
+    }
+
+    public canUnlock(biomeId: BiomeId): boolean {
+        return this.canUnlockBiome(biomeId);
+    }
+
+    public unlockBiome(biomeId: BiomeId): boolean {
+        if (!this.canUnlockBiome(biomeId)) return false;
+
+        const biome = BIOMES[biomeId];
+        const { wood, growthEssence } = biome.unlockCost;
+
+        if (wood && state.totalWood >= wood.amount) {
+            state.totalWood -= wood.amount;
+        } else if (growthEssence && state.prestige.growthEssence >= growthEssence) {
+            state.prestige.growthEssence -= growthEssence;
+        } else {
+            return false;
         }
 
-        setCurrentTree({
-            defId: selectedId,
-            currentHP: TREES[selectedId].maxHP,
-            isActive: true,
-        });
+        state.biome.unlockedBiomes.push(biomeId);
+        achievementSystem.setProgress('biomesUnlocked', state.biome.unlockedBiomes.length);
+        BiomeEvents.onBiomeUnlock(biomeId);
+        return true;
+    }
+
+    public changeBiome(biomeId: BiomeId): boolean {
+        if (!this.isBiomeUnlocked(biomeId)) return false;
+
+        state.biome.currentBiomeId = biomeId;
+        BiomeEvents.onBiomeChange(biomeId);
+        return true;
+    }
+
+    public getAllowedTrees(): string[] {
+        const currentBiome = this.getCurrentBiome();
+        return BIOMES[currentBiome]?.allowedTrees || BIOMES.default.allowedTrees;
     }
 }
 

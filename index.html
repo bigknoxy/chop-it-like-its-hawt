@@ -19,7 +19,7 @@
           <span class="wood-icon">🪵</span>
           <span class="wood-amount">0</span>
         </div>
-        <!-- Rare woods can be appended here dynamically -->
+        <button id="btn-wood-inventory" class="wood-inventory-btn" title="Wood Inventory">📦</button>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="axe-stats">
@@ -39,6 +39,11 @@
           <div id="tree-container">
             <div id="hp-bar-container">
               <div id="hp-bar-fill"></div>
+            </div>
+            <div class="special-status">
+              <div id="timer-display" class="special-pill hidden"></div>
+              <div id="phase-display" class="special-pill hidden"></div>
+              <div id="special-indicator" class="special-toast hidden"></div>
             </div>
             <div id="tree-sprite" class="tree-sprite">🌲</div>
             <div id="damage-numbers-layer"></div>
@@ -74,19 +79,59 @@
           </div>
         </div>
       </section>
-      <!-- Map Screen -->
-      <section id="screen-map" class="screen hidden">
-        <h2>World Map</h2>
-        <div id="map-list" class="scrollable-list">
-          <!-- Dynamic biome items go here -->
+      <!-- Achievements Screen -->
+      <section id="screen-achievements" class="screen hidden">
+        <h2>Achievements</h2>
+        <div class="achievement-summary">
+          <div class="achievement-summary-item">
+            <span class="achievement-summary-label">Achievement Points</span>
+            <span class="achievement-summary-value" id="ap-total">0</span>
+          </div>
+          <div class="achievement-summary-item">
+            <span class="achievement-summary-label">AP Bonus</span>
+            <span class="achievement-summary-value" id="ap-bonus">+0.0%</span>
+          </div>
+        </div>
+        <p class="achievement-note">AP grants +0.5% wood gain per point.</p>
+        <div id="achievements-list" class="achievement-list scrollable-list">
         </div>
       </section>
 
-      <!-- Pets Screen -->
-      <section id="screen-pets" class="screen hidden">
-        <h2>Companions</h2>
-        <div id="pets-list" class="scrollable-list">
-          <!-- Dynamic pet items go here -->
+      <!-- Skills Screen -->
+      <section id="screen-skills" class="screen hidden">
+        <h2>Skill Tree</h2>
+        <div class="skill-summary">
+          <div class="skill-summary-item">
+            <span class="skill-summary-label">Growth Essence Available</span>
+            <span class="skill-summary-value" id="skill-essence">0</span>
+          </div>
+        </div>
+        <p class="skill-note">Spend Growth Essence to unlock permanent bonuses.</p>
+        <div id="skills-list" class="skill-tree-list scrollable-list"></div>
+      </section>
+
+      <!-- Biomes Screen -->
+      <section id="screen-biomes" class="screen hidden">
+        <h2>Biomes</h2>
+        <div class="biome-current-card">
+          <span class="biome-current-label">Current Biome</span>
+          <span class="biome-current-value" id="biome-current">Forest</span>
+        </div>
+        <div id="biomes-list" class="biome-list scrollable-list">
+        </div>
+      </section>
+
+      <!-- Daily Screen -->
+      <section id="screen-daily" class="screen hidden">
+        <h2>Daily Rewards</h2>
+        <div class="daily-login-card">
+          <div class="daily-login-info">
+            <span class="daily-login-title">Daily Login</span>
+            <span class="daily-login-desc" id="daily-login-desc">Day 1 reward</span>
+          </div>
+          <button id="daily-login-claim" class="daily-claim-btn">Claim</button>
+        </div>
+        <div id="daily-quests-list" class="daily-quest-list scrollable-list">
         </div>
       </section>
     </main>
@@ -96,9 +141,10 @@
       <button class="nav-button active" data-target="screen-chop">🪓<br>Chop</button>
       <button class="nav-button" data-target="screen-upgrades">💪<br>Upgrades</button>
       <button class="nav-button" data-target="screen-axes">🗡️<br>Axes</button>
-      <button class="nav-button" data-target="screen-pets">🐻<br>Pets</button>
-      <button class="nav-button" data-target="screen-map">🗺️<br>Map</button>
       <button class="nav-button" id="nav-btn-forest" data-target="screen-forest">🌲<br>Forest</button>
+      <button class="nav-button" data-target="screen-achievements">🏆<br>Achievements</button>
+      <button class="nav-button" data-target="screen-daily">📅<br>Daily</button>
+      <button class="nav-button" data-target="screen-skills">🌳<br>Skills</button>
     </nav>
 
     <!-- Full Screen Overlays -->
@@ -108,8 +154,51 @@
         <button id="btn-toggle-sfx">Sound: ON</button>
         <button id="btn-toggle-haptics">Haptics: ON</button>
         <button id="btn-about">About</button>
+        <div id="prestige-section" class="settings-section">
+          <h3>🌲 Forest Rebirth</h3>
+          <div id="prestige-locked-msg">
+            <p>Unlock at 200 total wood earned</p>
+            <p id="prestige-progress">Lifetime Wood: 0 / 200</p>
+          </div>
+          <div id="prestige-unlocked" class="hidden">
+            <p>💎 Growth Essence: <span id="prestige-essence">0</span></p>
+            <p>📈 Production Bonus: <span id="prestige-bonus">+0%</span></p>
+            <p>⚡ Essence on Rebirth: <span id="prestige-preview">0</span></p>
+            <button id="btn-rebirth" class="danger">Rebirth Forest</button>
+          </div>
+        </div>
+        <button id="btn-achievements-open">Achievements</button>
+        <button id="btn-daily-open">Daily</button>
+        <button id="btn-skills-open">Skill Tree</button>
+        <button id="btn-biomes-open">Biomes</button>
         <button id="btn-hard-reset" class="danger">Hard Reset</button>
         <button id="btn-close-settings">Close</button>
+      </div>
+    </div>
+    <div id="rebirth-confirm-overlay" class="overlay hidden">
+      <div class="modal">
+        <h2>🌲 Forest Rebirth</h2>
+        <p>You will gain <span id="rebirth-essence-gain">0</span> Growth Essence.</p>
+        <p>Your production multiplier will increase to <span id="rebirth-new-bonus">+0%</span>.</p>
+        <div class="warning-box">
+          <p>⚠️ This will reset:</p>
+          <ul>
+            <li>All wood</li>
+            <li>All upgrades</li>
+            <li>Current tree progress</li>
+            <li>Equipped axe (returns to Rusty)</li>
+          </ul>
+          <p>✅ You keep:</p>
+          <ul>
+            <li>Unlocked axes</li>
+            <li>Growth Essence</li>
+            <li>Forest unlock status</li>
+          </ul>
+        </div>
+        <div class="modal-buttons">
+          <button id="btn-confirm-rebirth">Confirm Rebirth</button>
+          <button id="btn-cancel-rebirth">Cancel</button>
+        </div>
       </div>
     </div>
     <div id="about-overlay" class="overlay hidden">
@@ -118,6 +207,14 @@
         <p>Chop it like it's HAWT</p>
         <p>Version: <span id="game-version">1.0.0</span></p>
         <button id="btn-close-about">Close</button>
+      </div>
+    </div>
+    <div id="wood-inventory-overlay" class="overlay hidden">
+      <div class="modal wood-inventory-modal">
+        <h2>📦 Wood Inventory</h2>
+        <div id="wood-inventory-list" class="wood-inventory-list">
+        </div>
+        <button id="btn-close-wood-inventory">Close</button>
       </div>
     </div>
   </div>

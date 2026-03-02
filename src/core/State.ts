@@ -7,23 +7,57 @@ export const createInitialState = (): PlayerState => ({
         pine: 0,
         oak: 0,
         rare_amber: 0,
+        crystal_shard: 0,
+        gemstone: 0,
+        diamond_dust: 0,
     },
-    upgrades: {}, // e.g. { 'upg_strength': 1 }
+    upgrades: {},
     ownedAxes: ['axe_rusty'],
     equippedAxeId: 'axe_rusty',
     forest: {
         isUnlocked: false,
-        baseWoodPerSecond: 1, // Will increase eventually
+        baseWoodPerSecond: 1,
         multiplierFromUpgrades: 1,
         lastTickTimestamp: Date.now(),
     },
-
-    // V2
-    activeBiomeId: 'home_forest',
-    unlockedBiomes: ['home_forest'],
-    equippedCompanionId: null,
-    companions: {},
-
+    prestige: {
+        growthEssence: 0,
+        lifetimeWood: 0,
+        totalRebirths: 0,
+        lastRebirthTimestamp: Date.now(),
+    },
+    biome: {
+        currentBiomeId: 'default',
+        unlockedBiomes: ['default'],
+    },
+    achievements: {
+        progress: {
+            treesChopped: 0,
+            woodCollected: 0,
+            rebirths: 0,
+            biomesUnlocked: 1,
+        },
+        unlocked: {},
+        totalAP: 0,
+    },
+    skills: {
+        unlocked: {},
+        totalSpent: 0,
+    },
+    daily: {
+        lastResetDay: new Date().toISOString().slice(0, 10),
+        progress: {
+            treesChopped: 0,
+            woodCollected: 0,
+            upgradesPurchased: 0,
+        },
+        claimed: {},
+        login: {
+            dayIndex: 0,
+            claimedToday: false,
+            lastClaimDay: '',
+        },
+    },
     lastSaveTimestamp: Date.now(),
 });
 

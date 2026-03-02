@@ -1,17 +1,17 @@
-export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'crystal_shard' | 'gemstone' | 'diamond_dust' | string;
+export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'spooky_wood' | 'glacier_sap' | 'crystal_shard' | 'gemstone' | 'diamond_dust' | 'ember_ash' | 'magma_core' | 'phoenix_feather' | string;
 
-export type BiomeId = 'default' | 'crystal_caverns' | string;
+export type BiomeId = 'default' | 'crystal_caverns' | 'volcanic_grove' | string;
 
 export interface BiomeDefinition {
-    id: BiomeId;
-    name: string;
-    description: string;
-    unlockCost: {
-        wood?: { amount: number };
-        growthEssence?: number;
-    };
-    allowedTrees: string[];
-    emoji: string;
+  id: BiomeId;
+  name: string;
+  description: string;
+  unlockCost: {
+    wood?: { amount: number };
+    growthEssence?: number;
+  };
+  allowedTrees: string[];
+  emoji: string;
 }
 
 export interface WoodType {
@@ -19,6 +19,19 @@ export interface WoodType {
   name: string;
   valueMultiplier: number;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+export type CompanionId = 'beaver_bob' | 'woodpecker_willy' | 'bear_barry' | string;
+
+export interface CompanionDefinition {
+  id: CompanionId;
+  name: string;
+  description: string;
+  emoji: string;
+  unlockCost: { woodTypeId: WoodTypeId; amount: number }[];
+  baseDps: number;
+  maxLevel: number;
+  levelCostMultiplier: number; // How much wood the next level costs
 }
 
 export interface TreeDefinition {

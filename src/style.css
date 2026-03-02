@@ -37,6 +37,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* Fallback for older browsers */
+  height: 100dvh;
   width: 100vw;
   max-width: 600px;
   margin: 0 auto;
@@ -917,9 +919,6 @@ body {
 
 /* Settings */
 #btn-settings-open {
-  position: absolute;
-  top: 15px;
-  right: 15px;
   background: none;
   border: none;
   font-size: 1.5rem;

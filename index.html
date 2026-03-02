@@ -21,9 +21,12 @@
         </div>
         <button id="btn-wood-inventory" class="wood-inventory-btn" title="Wood Inventory">📦</button>
       </div>
-      <div class="axe-stats">
-        <span id="ui-equipped-axe">Rusty Axe</span>
-        <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="axe-stats">
+          <span id="ui-equipped-axe">Rusty Axe</span>
+          <span id="ui-axe-power">Dmg: 1 | Crit: 0%</span>
+        </div>
+        <button id="btn-settings-open" title="Settings">⚙️</button>
       </div>
     </header>
 
@@ -76,7 +79,6 @@
           </div>
         </div>
       </section>
-
       <!-- Achievements Screen -->
       <section id="screen-achievements" class="screen hidden">
         <h2>Achievements</h2>
@@ -215,7 +217,6 @@
         <button id="btn-close-wood-inventory">Close</button>
       </div>
     </div>
-    <button id="btn-settings-open">⚙️</button>
   </div>
 
   <script type="module" src="/src/main.ts"></script>

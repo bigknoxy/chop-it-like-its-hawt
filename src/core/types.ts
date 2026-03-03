@@ -1,6 +1,23 @@
-export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'spooky_wood' | 'glacier_sap' | 'crystal_shard' | 'gemstone' | 'diamond_dust' | 'ember_ash' | 'magma_core' | 'phoenix_feather' | string;
+export type WoodTypeId = 
+    | 'basic' | 'pine' | 'oak' | 'rare_amber' 
+    | 'spooky_wood' | 'glacier_sap' 
+    | 'crystal_shard' | 'gemstone' | 'diamond_dust' 
+    | 'ember_ash' | 'magma_core' | 'phoenix_feather'
+    | 'ice_crystal' | 'glacier_core' | 'permafrost_heart'
+    | 'spectral_wood' | 'cursed_essence' | 'nightmare_heart'
+    | 'star_dust' | 'celestial_core' | 'divine_essence'
+    | 'void_crystal' | 'eldritch_essence' | 'primordial_heart'
+    | string;
 
-export type BiomeId = 'default' | 'crystal_caverns' | 'volcanic_grove' | string;
+export type BiomeId = 
+    | 'default' 
+    | 'crystal_caverns' 
+    | 'volcanic_grove' 
+    | 'frozen_tundra' 
+    | 'haunted_grove' 
+    | 'celestial_orchard' 
+    | 'abyssal_depths' 
+    | string;
 
 export interface BiomeDefinition {
   id: BiomeId;
@@ -42,7 +59,7 @@ export interface TreeDefinition {
   woodTypeId: WoodTypeId;
   spawnWeight: number;
   emoji: string;
-  specialMechanic?: 'chest' | 'timed' | 'multiPhase' | string;
+  specialMechanic?: 'chest' | 'timed' | 'multiPhase' | 'frostShield' | 'soulDrain' | 'blessing' | 'chaosChop' | string;
   biome?: BiomeId;
   phaseCount?: number;
 }
@@ -82,7 +99,7 @@ export interface AxeDefinition {
   tier: number;
   damageMultiplier: number;
   critBonus?: number;
-  specialAbility?: 'doubleWood' | 'splashDamage' | 'fastTick' | string;
+  specialAbility?: 'doubleWood' | 'splashDamage' | 'fastTick' | 'chillEffect' | 'soulHarvest' | 'divineStrike' | 'voidTear' | 'cosmicFury' | 'apocalypse' | string;
   unlockCost: { woodTypeId: WoodTypeId; amount: number }[];
 }
 

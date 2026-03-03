@@ -10,32 +10,57 @@ import { questSystem } from './QuestSystem';
 import { skillSystem } from './SkillSystem';
 
 export type SpecialMechanicResult = {
-    type: 'chest' | 'timed' | 'multiPhase' | null;
+    type: 'chest' | 'timed' | 'multiPhase' | 'frostShield' | 'soulDrain' | 'blessing' | 'chaosChop' | null;
     bonusWood?: number;
     isTimedBonus?: boolean;
     phaseReward?: number;
     phase?: number;
     maxPhases?: number;
+    isFrozen?: boolean;
+    damageVariance?: number;
+    essenceGained?: number;
 };
 
 // Events to notify UI
 export const ChopEvents = {
-    onDamage: (amount: number, isCrit: boolean) => { },
+    onDamage: (amount: number, isCrit: boolean, special?: { frozen?: boolean; variance?: number }) => { },
     onTreeFall: (woodGained: number, woodId: string, specialResult?: SpecialMechanicResult) => { },
     onWoodUpdate: () => { },
     onPhaseChange: (phase: number, maxPhases: number) => { },
     onChestOpen: () => { },
+    onFreeze: () => { },
+    onSoulHarvest: (essenceGained: number) => { },
+    onVoidTear: () => { },
 };
 
 export class ChopSystem {
     private lastHitTime: number = 0;
     private baseHitIntervalMs: number = 100;
     private isHolding: boolean = false;
+    private hitCount: number = 0;
+    private isFrozen: boolean = false;
 
-    private getDamage(): { amount: number; isCrit: boolean } {
+    private hasAxeAbility(ability: string): boolean {
+        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
+        if (axe.specialAbility === ability) return true;
+        if (axe.specialAbility === 'apocalypse') return true;
+        return false;
+    }
+
+    private getDamage(): { amount: number; isCrit: boolean; variance?: number } {
         let baseDamage = 1;
+        let variance: number | undefined;
 
-        // Upgrades
+        const def = TREES[currentTree.defId];
+        if (!def) {
+            return { amount: 1, isCrit: false };
+        }
+        
+        if (def.specialMechanic === 'chaosChop') {
+            variance = 0.5 + Math.random() * 1.5;
+            baseDamage *= variance;
+        }
+
         const upgStrengthLvl = state.upgrades['upg_strength'] || 0;
         baseDamage += upgStrengthLvl * UPGRADES.upg_strength.effectPerLevel;
 
@@ -43,7 +68,6 @@ export class ChopSystem {
         const sizeMult = 1 + (upgAxeSizeLvl * UPGRADES.upg_axe_size.effectPerLevel);
         baseDamage *= sizeMult;
 
-        // Axe
         const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
         baseDamage *= axe.damageMultiplier;
 
@@ -52,7 +76,6 @@ export class ChopSystem {
         const skillBonuses = skillSystem.getTotalBonuses();
         baseDamage *= 1 + (skillBonuses.damagePct || 0);
 
-        // Crit
         const upgLuckLvl = state.upgrades['upg_luck'] || 0;
         let critChance = upgLuckLvl * UPGRADES.upg_luck.effectPerLevel;
         critChance += axe.critBonus || 0;
@@ -63,10 +86,24 @@ export class ChopSystem {
         if (isCrit) {
             const upgSharpnessLvl = state.upgrades['upg_axe_sharpness'] || 0;
             let critMult = 2 + (upgSharpnessLvl * UPGRADES.upg_axe_sharpness.effectPerLevel);
+            
+            if (this.hasAxeAbility('divineStrike')) {
+                critMult *= 2;
+            }
             baseDamage *= critMult;
         }
 
-        return { amount: Math.ceil(baseDamage), isCrit };
+        if (this.isFrozen) {
+            baseDamage *= 3;
+            this.isFrozen = false;
+        }
+
+        this.hitCount++;
+        if (this.hasAxeAbility('cosmicFury') && this.hitCount % 10 === 0) {
+            baseDamage *= 10;
+        }
+
+        return { amount: Math.ceil(baseDamage), isCrit, variance };
     }
 
     public handleInput(isDown: boolean) {
@@ -102,14 +139,19 @@ export class ChopSystem {
 
     private hit() {
         this.lastHitTime = performance.now();
-        const { amount, isCrit } = this.getDamage();
+        const { amount, isCrit, variance } = this.getDamage();
+        
+        if (this.hasAxeAbility('chillEffect') && Math.random() < 0.15 && !this.isFrozen) {
+            this.isFrozen = true;
+            ChopEvents.onFreeze();
+        }
+        
         this.applyDamage(amount, isCrit);
-        ChopEvents.onDamage(amount, isCrit);
+        ChopEvents.onDamage(amount, isCrit, { frozen: this.isFrozen, variance });
     }
 
     private getHitIntervalMs(): number {
-        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
-        if (axe.specialAbility === 'fastTick') {
+        if (this.hasAxeAbility('fastTick')) {
             return this.baseHitIntervalMs * 0.5;
         }
         return this.baseHitIntervalMs;
@@ -120,12 +162,40 @@ export class ChopSystem {
         const def = TREES[currentTree.defId];
         const maxPhases = def.phaseCount || 1;
 
-        currentTree.currentHP -= amount;
+        let finalDamage = amount;
+
+        if (def.specialMechanic === 'frostShield') {
+            const shieldThreshold = def.maxHP * 0.2;
+            if (currentTree.currentHP > def.maxHP - shieldThreshold) {
+                finalDamage *= 0.5;
+            }
+        }
+
+        if (this.hasAxeAbility('voidTear') && Math.random() < 0.05) {
+            if (def.specialMechanic !== 'chest' && def.specialMechanic !== 'multiPhase') {
+                currentTree.currentHP = 0;
+                ChopEvents.onVoidTear();
+                this.breakTree();
+                return;
+            }
+        }
+
+        currentTree.currentHP -= finalDamage;
+
+        if (def.specialMechanic === 'soulDrain' && isCrit) {
+            if (Math.random() < 0.1) {
+                const healAmount = Math.ceil(def.baseWoodYield * 0.5);
+                const bonusReward = Math.ceil(achievementSystem.applyWoodBonus(healAmount));
+                state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + bonusReward;
+                const woodDef = WOODS[def.woodTypeId];
+                const totalAdded = bonusReward * woodDef.valueMultiplier;
+                state.totalWood += totalAdded;
+                ChopEvents.onWoodUpdate();
+            }
+        }
 
         const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
         if (axe.specialAbility === 'splashDamage') {
-            // Placeholder: splash would affect other trees in biome (future multi-tree)
-            // For now, just track that splash is active
         }
 
         if (def.specialMechanic === 'multiPhase' && maxPhases > 1) {
@@ -168,8 +238,7 @@ export class ChopSystem {
         const upgAxeSizeLvl = state.upgrades['upg_axe_size'] || 0;
         woodGain *= 1 + (upgAxeSizeLvl * 0.02);
 
-        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
-        if (axe.specialAbility === 'doubleWood' && Math.random() < 0.2) {
+        if (this.hasAxeAbility('doubleWood') && Math.random() < 0.2) {
             woodGain *= 2;
         }
 
@@ -200,12 +269,42 @@ export class ChopSystem {
             };
         }
 
+        if (def.specialMechanic === 'frostShield') {
+            specialResult = { type: 'frostShield' };
+        }
+
+        if (def.specialMechanic === 'soulDrain') {
+            specialResult = { type: 'soulDrain' };
+        }
+
+        if (def.specialMechanic === 'blessing') {
+            if (Math.random() < 0.10) {
+                const originalGain = woodGain;
+                woodGain *= 3;
+                specialResult = { type: 'blessing', bonusWood: originalGain * 2 };
+            }
+        }
+
+        if (def.specialMechanic === 'chaosChop') {
+            specialResult = { type: 'chaosChop' };
+        }
+
+        if (this.hasAxeAbility('soulHarvest') && Math.random() < 0.1) {
+            state.prestige.growthEssence += 1;
+            specialResult.essenceGained = 1;
+            ChopEvents.onSoulHarvest(1);
+        }
+
         woodGain = Math.ceil(woodGain);
         woodGain = Math.ceil(achievementSystem.applyWoodBonus(woodGain));
 
         state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
 
         const woodDef = WOODS[def.woodTypeId];
+        if (!woodDef) {
+            console.warn(`Unknown wood type: ${def.woodTypeId}`);
+            return;
+        }
         const skillBonuses = skillSystem.getTotalBonuses();
         const valueMultiplier = woodDef.valueMultiplier * (1 + (skillBonuses.woodValuePct || 0));
         const totalAdded = woodGain * valueMultiplier;
@@ -219,6 +318,9 @@ export class ChopSystem {
 
         ChopEvents.onTreeFall(woodGain, def.woodTypeId, specialResult);
         ChopEvents.onWoodUpdate();
+
+        this.hitCount = 0;
+        this.isFrozen = false;
 
         setTimeout(() => this.spawnNextTree(), 500);
     }

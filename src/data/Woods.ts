@@ -1,5 +1,3 @@
-export type WoodTypeId = 'basic' | 'pine' | 'oak' | 'rare_amber' | 'spooky_wood' | 'glacier_sap' | string;
-
 import { WoodType } from '../core/types';
 
 export const WOODS: Record<string, WoodType> = {
@@ -73,6 +71,78 @@ export const WOODS: Record<string, WoodType> = {
         id: 'phoenix_feather',
         name: 'Phoenix Feather',
         valueMultiplier: 20,
+        rarity: 'legendary',
+    },
+    ice_crystal: {
+        id: 'ice_crystal',
+        name: 'Ice Crystal',
+        valueMultiplier: 8,
+        rarity: 'rare',
+    },
+    glacier_core: {
+        id: 'glacier_core',
+        name: 'Glacier Core',
+        valueMultiplier: 25,
+        rarity: 'epic',
+    },
+    permafrost_heart: {
+        id: 'permafrost_heart',
+        name: 'Permafrost Heart',
+        valueMultiplier: 50,
+        rarity: 'legendary',
+    },
+    spectral_wood: {
+        id: 'spectral_wood',
+        name: 'Spectral Wood',
+        valueMultiplier: 15,
+        rarity: 'rare',
+    },
+    cursed_essence: {
+        id: 'cursed_essence',
+        name: 'Cursed Essence',
+        valueMultiplier: 40,
+        rarity: 'epic',
+    },
+    nightmare_heart: {
+        id: 'nightmare_heart',
+        name: 'Nightmare Heart',
+        valueMultiplier: 100,
+        rarity: 'legendary',
+    },
+    star_dust: {
+        id: 'star_dust',
+        name: 'Star Dust',
+        valueMultiplier: 30,
+        rarity: 'rare',
+    },
+    celestial_core: {
+        id: 'celestial_core',
+        name: 'Celestial Core',
+        valueMultiplier: 75,
+        rarity: 'epic',
+    },
+    divine_essence: {
+        id: 'divine_essence',
+        name: 'Divine Essence',
+        valueMultiplier: 200,
+        rarity: 'legendary',
+    },
+    void_crystal: {
+        id: 'void_crystal',
+        name: 'Void Crystal',
+        valueMultiplier: 50,
+        rarity: 'epic',
+    },
+    eldritch_essence: {
+        id: 'eldritch_essence',
+        name: 'Eldritch Essence',
+        valueMultiplier: 150,
+        rarity: 'legendary',
+    },
+    primordial_heart: {
+        id: 'primordial_heart',
+        name: 'Primordial Heart',
+        valueMultiplier: 500,
         rarity: 'legendary',
     }
 };

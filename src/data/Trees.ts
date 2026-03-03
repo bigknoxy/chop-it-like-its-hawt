@@ -120,6 +120,138 @@ export const TREES: Record<string, TreeDefinition> = {
         spawnWeight: 10,
         biome: 'volcanic_grove',
         emoji: '🌲'
+    },
+    frost_birch: {
+        id: 'frost_birch',
+        name: 'Frost Birch',
+        maxHP: 2000,
+        baseWoodYield: 15,
+        woodTypeId: 'ice_crystal',
+        spawnWeight: 50,
+        biome: 'frozen_tundra',
+        specialMechanic: 'frostShield',
+        emoji: '❄️'
+    },
+    glacier_willow: {
+        id: 'glacier_willow',
+        name: 'Glacier Willow',
+        maxHP: 3500,
+        baseWoodYield: 10,
+        woodTypeId: 'glacier_core',
+        spawnWeight: 25,
+        biome: 'frozen_tundra',
+        specialMechanic: 'frostShield',
+        emoji: '🌳'
+    },
+    ancient_frost_pine: {
+        id: 'ancient_frost_pine',
+        name: 'Ancient Frost Pine',
+        maxHP: 5500,
+        baseWoodYield: 8,
+        woodTypeId: 'permafrost_heart',
+        spawnWeight: 10,
+        biome: 'frozen_tundra',
+        specialMechanic: 'frostShield',
+        emoji: '🌲'
+    },
+    ghost_birch: {
+        id: 'ghost_birch',
+        name: 'Ghost Birch',
+        maxHP: 4500,
+        baseWoodYield: 18,
+        woodTypeId: 'spectral_wood',
+        spawnWeight: 50,
+        biome: 'haunted_grove',
+        specialMechanic: 'soulDrain',
+        emoji: '👻'
+    },
+    cursed_willow: {
+        id: 'cursed_willow',
+        name: 'Cursed Willow',
+        maxHP: 7000,
+        baseWoodYield: 12,
+        woodTypeId: 'cursed_essence',
+        spawnWeight: 25,
+        biome: 'haunted_grove',
+        specialMechanic: 'soulDrain',
+        emoji: '🌳'
+    },
+    nightmare_oak: {
+        id: 'nightmare_oak',
+        name: 'Nightmare Oak',
+        maxHP: 10000,
+        baseWoodYield: 10,
+        woodTypeId: 'nightmare_heart',
+        spawnWeight: 10,
+        biome: 'haunted_grove',
+        specialMechanic: 'soulDrain',
+        emoji: '🍁'
+    },
+    starlight_birch: {
+        id: 'starlight_birch',
+        name: 'Starlight Birch',
+        maxHP: 9000,
+        baseWoodYield: 25,
+        woodTypeId: 'star_dust',
+        spawnWeight: 50,
+        biome: 'celestial_orchard',
+        specialMechanic: 'blessing',
+        emoji: '✨'
+    },
+    divine_willow: {
+        id: 'divine_willow',
+        name: 'Divine Willow',
+        maxHP: 15000,
+        baseWoodYield: 15,
+        woodTypeId: 'celestial_core',
+        spawnWeight: 25,
+        biome: 'celestial_orchard',
+        specialMechanic: 'blessing',
+        emoji: '🌳'
+    },
+    world_tree_sapling: {
+        id: 'world_tree_sapling',
+        name: 'World Tree Sapling',
+        maxHP: 25000,
+        baseWoodYield: 12,
+        woodTypeId: 'divine_essence',
+        spawnWeight: 10,
+        biome: 'celestial_orchard',
+        specialMechanic: 'blessing',
+        emoji: '🌟'
+    },
+    void_touched_birch: {
+        id: 'void_touched_birch',
+        name: 'Void-Touched Birch',
+        maxHP: 20000,
+        baseWoodYield: 40,
+        woodTypeId: 'void_crystal',
+        spawnWeight: 50,
+        biome: 'abyssal_depths',
+        specialMechanic: 'chaosChop',
+        emoji: '🌀'
+    },
+    eldritch_willow: {
+        id: 'eldritch_willow',
+        name: 'Eldritch Willow',
+        maxHP: 35000,
+        baseWoodYield: 25,
+        woodTypeId: 'eldritch_essence',
+        spawnWeight: 25,
+        biome: 'abyssal_depths',
+        specialMechanic: 'chaosChop',
+        emoji: '👁️'
+    },
+    primordial_tree: {
+        id: 'primordial_tree',
+        name: 'Primordial Tree',
+        maxHP: 60000,
+        baseWoodYield: 20,
+        woodTypeId: 'primordial_heart',
+        spawnWeight: 10,
+        biome: 'abyssal_depths',
+        specialMechanic: 'chaosChop',
+        emoji: '🌑'
     }
 };
 

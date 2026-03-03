@@ -30,5 +30,49 @@ export const BIOMES: Record<string, BiomeDefinition> = {
         },
         allowedTrees: ['ember_oak', 'magma_willow', 'phoenix_pine'],
         emoji: '🌲'
+    },
+    frozen_tundra: {
+        id: 'frozen_tundra',
+        name: 'Frozen Tundra',
+        description: 'An icy wasteland where ancient trees are preserved in eternal frost.',
+        unlockCost: {
+            wood: { amount: 2500 },
+            growthEssence: 50
+        },
+        allowedTrees: ['frost_birch', 'glacier_willow', 'ancient_frost_pine'],
+        emoji: '❄️'
+    },
+    haunted_grove: {
+        id: 'haunted_grove',
+        name: 'Haunted Grove',
+        description: 'A cursed forest where ghostly trees whisper secrets of the damned.',
+        unlockCost: {
+            wood: { amount: 7500 },
+            growthEssence: 100
+        },
+        allowedTrees: ['ghost_birch', 'cursed_willow', 'nightmare_oak'],
+        emoji: '👻'
+    },
+    celestial_orchard: {
+        id: 'celestial_orchard',
+        name: 'Celestial Orchard',
+        description: 'A divine grove where starlight crystallizes into precious wood.',
+        unlockCost: {
+            wood: { amount: 25000 },
+            growthEssence: 250
+        },
+        allowedTrees: ['starlight_birch', 'divine_willow', 'world_tree_sapling'],
+        emoji: '⭐'
+    },
+    abyssal_depths: {
+        id: 'abyssal_depths',
+        name: 'Abyssal Depths',
+        description: 'The void between worlds, where eldritch trees feed on cosmic energy.',
+        unlockCost: {
+            wood: { amount: 100000 },
+            growthEssence: 500
+        },
+        allowedTrees: ['void_touched_birch', 'eldritch_willow', 'primordial_tree'],
+        emoji: '🌌'
     }
 };

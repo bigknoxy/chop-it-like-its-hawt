@@ -21,7 +21,6 @@ export type SpecialMechanicResult = {
     essenceGained?: number;
 };
 
-// Events to notify UI
 export const ChopEvents = {
     onDamage: (amount: number, isCrit: boolean, special?: { frozen?: boolean; variance?: number }) => { },
     onTreeFall: (woodGained: number, woodId: string, specialResult?: SpecialMechanicResult) => { },
@@ -31,6 +30,7 @@ export const ChopEvents = {
     onFreeze: () => { },
     onSoulHarvest: (essenceGained: number) => { },
     onVoidTear: () => { },
+    onComboUpdate: (combo: number, bonus: number) => { },
 };
 
 export class ChopSystem {
@@ -39,12 +39,13 @@ export class ChopSystem {
     private isHolding: boolean = false;
     private hitCount: number = 0;
     private isFrozen: boolean = false;
+    private combo: number = 0;
+    private lastComboTime: number = 0;
+    private readonly COMBO_DECAY_MS: number = 5000;
 
     private hasAxeAbility(ability: string): boolean {
         const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
-        if (axe.specialAbility === ability) return true;
-        if (axe.specialAbility === 'apocalypse') return true;
-        return false;
+        return axe.specialAbility === ability || axe.specialAbility === 'apocalypse';
     }
 
     private getDamage(): { amount: number; isCrit: boolean; variance?: number } {
@@ -52,10 +53,8 @@ export class ChopSystem {
         let variance: number | undefined;
 
         const def = TREES[currentTree.defId];
-        if (!def) {
-            return { amount: 1, isCrit: false };
-        }
-        
+        if (!def) return { amount: 1, isCrit: false };
+
         if (def.specialMechanic === 'chaosChop') {
             variance = 0.5 + Math.random() * 1.5;
             baseDamage *= variance;
@@ -109,15 +108,20 @@ export class ChopSystem {
     public handleInput(isDown: boolean) {
         this.isHolding = isDown;
         if (isDown) {
-            // Immediate hit on tap
             const now = performance.now();
-            if (now - this.lastHitTime > 50) { // Slight debounce to prevent macro spam
+            if (now - this.lastHitTime > 50) {
                 this.hit();
             }
         }
     }
 
     public update(dt: number) {
+        const now = performance.now();
+        if (this.combo > 0 && now - this.lastComboTime > this.COMBO_DECAY_MS) {
+            this.combo = 0;
+            ChopEvents.onComboUpdate(0, 0);
+        }
+
         // Handle Auto-Chop
         const autoChopLvl = state.upgrades['upg_autochop'] || 0;
         if (autoChopLvl > 0) {
@@ -139,6 +143,7 @@ export class ChopSystem {
 
     private hit() {
         this.lastHitTime = performance.now();
+        this.lastComboTime = this.lastHitTime;
         const { amount, isCrit, variance } = this.getDamage();
         
         if (this.hasAxeAbility('chillEffect') && Math.random() < 0.15 && !this.isFrozen) {
@@ -192,10 +197,6 @@ export class ChopSystem {
                 state.totalWood += totalAdded;
                 ChopEvents.onWoodUpdate();
             }
-        }
-
-        const axe = AXES[state.equippedAxeId] || AXES['axe_rusty'];
-        if (axe.specialAbility === 'splashDamage') {
         }
 
         if (def.specialMechanic === 'multiPhase' && maxPhases > 1) {
@@ -297,6 +298,7 @@ export class ChopSystem {
 
         woodGain = Math.ceil(woodGain);
         woodGain = Math.ceil(achievementSystem.applyWoodBonus(woodGain));
+        woodGain = Math.ceil(woodGain * (1 + this.getComboBonus()));
 
         state.woodByType[def.woodTypeId] = (state.woodByType[def.woodTypeId] || 0) + woodGain;
 
@@ -321,7 +323,9 @@ export class ChopSystem {
 
         this.hitCount = 0;
         this.isFrozen = false;
-
+        this.combo++;
+        this.lastComboTime = performance.now();
+        ChopEvents.onComboUpdate(this.combo, this.getComboBonus());
         setTimeout(() => this.spawnNextTree(), 500);
     }
 
@@ -354,6 +358,15 @@ export class ChopSystem {
             spawnTime: Date.now(),
             currentPhase: def.phaseCount || 1,
         });
+    }
+
+    public getCombo(): number {
+        return this.combo;
+    }
+
+    public getComboBonus(): number {
+        const base = this.combo / 20;
+        return Math.min(1, base * base);
     }
 }
 

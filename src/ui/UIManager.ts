@@ -25,6 +25,7 @@ export class UIManager {
     private specialIndicator = document.getElementById('special-indicator')!;
     private timerDisplay = document.getElementById('timer-display')!;
     private phaseDisplay = document.getElementById('phase-display')!;
+    private comboDisplay = document.getElementById('combo-counter')!;
     private curScreenId = 'screen-chop';
     private timerInterval: number | null = null;
     private chestTimeout: number | null = null;
@@ -159,10 +160,17 @@ export class UIManager {
             this.playHaptic(isCrit ? 'heavy' : 'light');
         };
 
+        ChopEvents.onComboUpdate = (combo, bonus) => {
+            this.updateComboDisplay(combo, bonus);
+        };
+
         ChopEvents.onTreeFall = (amt, woodId, specialResult) => {
             this.animateTreeFall();
             this.spawnRewardNumber(amt, woodId);
             this.playHaptic('success');
+            if (chopSystem.getCombo() > 0) {
+                this.triggerComboPulse();
+            }
             this.clearTimer();
             if (specialResult?.type === 'timed' && specialResult.isTimedBonus) {
                 this.showSpecialToast('Timed bonus! Extra wood!');
@@ -559,6 +567,7 @@ export class UIManager {
         this.treeSprite.classList.remove('tree-fall');
         this.treeSprite.classList.remove('chest-pulse');
         this.treeSprite.style.opacity = '1';
+        this.treeSprite.classList.remove('combo-pulse');
 
         this.updateHPBar();
         this.resetSpecialIndicators();
@@ -644,6 +653,14 @@ export class UIManager {
         this.treeSprite.classList.add('chest-pulse');
     }
 
+    private triggerComboPulse() {
+        if (this.comboDisplay && chopSystem.getCombo() > 0) {
+            this.comboDisplay.classList.remove('combo-pulse');
+            void this.comboDisplay.offsetWidth;
+            this.comboDisplay.classList.add('combo-pulse');
+        }
+    }
+
     private resetSpecialIndicators() {
         this.timerDisplay.classList.remove('expired');
         this.specialIndicator.classList.add('hidden');
@@ -655,6 +672,24 @@ export class UIManager {
         if (this.timerInterval !== null) {
             window.clearInterval(this.timerInterval);
             this.timerInterval = null;
+        }
+    }
+
+    private updateComboDisplay(combo: number, bonus: number) {
+        if (!this.comboDisplay) return;
+        if (combo > 0) {
+            this.comboDisplay.textContent = `${combo}x`;
+            const pct = Math.floor(bonus * 100);
+            this.comboDisplay.title = `+${pct}% wood bonus`;
+            this.comboDisplay.classList.remove('hidden');
+        } else {
+            this.comboDisplay.classList.add('hidden');
+        }
+    }
+
+    private hideComboDisplay() {
+        if (this.comboDisplay) {
+            this.comboDisplay.classList.add('hidden');
         }
     }
 
@@ -928,7 +963,6 @@ export class UIManager {
 
     private shakeTree() {
         this.treeSprite.classList.remove('tree-shake');
-        // trigger reflow
         void this.treeSprite.offsetWidth;
         this.treeSprite.classList.add('tree-shake');
     }
